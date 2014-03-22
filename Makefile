@@ -3,23 +3,34 @@ SHELL := /bin/bash
 G := g++
 
 CC := $(G) --std=c++11 -Wall -Wextra --pedantic -c
-LD := $(G) --std=c++11 -Wall -Wextra --pedantic
+LD := libdistributed
+SC := SpellCorrector
 
 .PHONY: default
-default: libdistributed SpellCorrector
+default: $(LD)/libdistributed.exe $(SC)/spellcorrector.exe
 
-libdistributed:
-	wget -O libdistributed.zip https://github.com/juliasets/libdistributed/archive/master.zip
-	unzip -o libdistributed.zip
-	rm libdistributed.zip
-	mv libdistributed-master libdistributed
+$(LD)/libdistributed.exe:
+	cd $(LD) && make
 
-SpellCorrector:
-	wget -O spellcorrector.zip https://github.com/elizabethkilson/SpellCorrector/archive/master.zip
-	unzip -o spellcorrector.zip
-	rm spellcorrector.zip
-	mv SpellCorrector-master spellcorrector
+$(SC)/spellcorrector.exe:
+	cd $(SC) && make
+
+.PHONY: install
+install:
+	git clone https://github.com/juliasets/libdistributed.git
+	git clone https://github.com/elizabethkilson/SpellCorrector.git
+
+.PHONY: update
+update:
+	cd libdistributed && git pull
+	cd $(SC) && git pull
+
+.PHONY: cleanish
+cleanish:
+	rm -rf *.exe *.o *.stackdump *~
 
 .PHONY: clean
 clean:
-	rm -rf *~
+	rm -rf *.exe *.o *.stackdump *~
+	rm -rf $(LD)
+	rm -rf $(SC)
