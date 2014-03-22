@@ -10,27 +10,39 @@ SC := SpellCorrector
 default: $(LD)/libdistributed.exe $(SC)/spellcorrector.exe
 
 $(LD)/libdistributed.exe:
-	cd $(LD) && make
+	cd $(LD) && $(MAKE)
 
 $(SC)/spellcorrector.exe:
-	cd $(SC) && make
+	cd $(SC) && $(MAKE)
 
 .PHONY: install
 install:
-	git clone https://github.com/juliasets/libdistributed.git
-	git clone https://github.com/elizabethkilson/SpellCorrector.git
+	@echo 'Installing $(LD)...'
+	@git clone -q https://github.com/juliasets/libdistributed.git
+	@echo 'Installed $(LD)'
+	@echo 'Installing $(SC)...'
+	@git clone -q https://github.com/elizabethkilson/SpellCorrector.git
+	@echo 'Installed $(SC)'
 
 .PHONY: update
 update:
-	cd libdistributed && git pull
-	cd $(SC) && git pull
+	@echo 'Updating $(LD)...'
+	@cd libdistributed && git pull -q
+	@echo '$(LD) up to date.'
+	@echo 'Updating $(SC)...'
+	@cd $(SC) && git pull -q
+	@echo '$(SC) up to date.'
 
 .PHONY: cleanish
 cleanish:
-	rm -rf *.exe *.o *.stackdump *~
+	@rm -rf *.exe *.o *.stackdump *~
+	@cd $(LD) && rm -rf *.exe *.o *.stackdump *~
+	@cd $(SC) && rm -rf *.exe *.o *.stackdump *~
+	@echo 'Tidied up.'
 
 .PHONY: clean
 clean:
-	rm -rf *.exe *.o *.stackdump *~
-	rm -rf $(LD)
-	rm -rf $(SC)
+	@rm -rf *.exe *.o *.stackdump *~
+	@rm -rf $(LD)
+	@rm -rf $(SC)
+	@echo 'Clean.'
