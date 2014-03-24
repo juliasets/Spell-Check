@@ -3,35 +3,36 @@ SHELL := /bin/bash
 G  := g++
 
 CC  := $(G) --std=c++11 -Wall -Wextra --pedantic -c
-LD  := libdistributed
+LD  := $(G) --std=c++11 -Wall -Wextra --pedantic -lboost_system -pthread
+LB  := libdistributed
 SC  := SpellCorrector
 GC  := git clone -q
-LDU := https://github.com/juliasets/libdistributed.git
+LBU := https://github.com/juliasets/libdistributed.git
 SCU := https://github.com/elizabethkilson/SpellCorrector.git
 
 .PHONY: default
-default: $(LD)/libdistributed.exe $(SC)/spellcorrector.exe
+default: $(LB)/libdistributed.exe $(SC)/spellcorrector.exe client
 
-$(LD)/libdistributed.exe:
+$(LB)/libdistributed.exe:
 # 	Ensure that the directory contains what it should
-	@if test -d "./$(LD)";  then \
-		if test ! -d "./$(LD)/.git";  then \
-			rm -rf $(LD); \
+	@if test -d "./$(LB)";  then \
+		if test ! -d "./$(LB)/.git";  then \
+			rm -rf $(LB); \
 			echo ''; \
-			echo 'Installing $(LD)...'; \
-			$(GC) $(LDU); \
-			echo 'Installed $(LD).'; \
+			echo 'Installing $(LB)...'; \
+			$(GC) $(LBU); \
+			echo 'Installed $(LB).'; \
 			echo ''; \
 		fi \
 	else \
 		echo ''; \
-		echo 'Installing $(LD)...'; \
-		$(GC) $(LDU); \
-		echo 'Installed $(LD)'.; \
+		echo 'Installing $(LB)...'; \
+		$(GC) $(LBU); \
+		echo 'Installed $(LB)'.; \
 		echo ''; \
 	fi
 #	Actually run make
-	@cd $(LD) && $(MAKE)
+	@cd $(LB) && $(MAKE)
 
 $(SC)/spellcorrector.exe:
 #	Ensure that the directory contains what it should
@@ -54,11 +55,20 @@ $(SC)/spellcorrector.exe:
 #	Actually run make
 	@cd $(SC) && $(MAKE);
 
+client: client.o utility.o
+	$(LD) -o client client.o $(LB)/libdistributed.o utility.o
+
+client.o: client.cpp $(LB)/libdistributed.hpp
+	$(CC) client.cpp
+
+utility.o: $(LB)/utility.hpp $(LB)/utility_macros.hpp $(LB)/utility.cpp
+	$(CC) $(LB)/utility.cpp
+
 .PHONY: update
 update:
-	@echo 'Updating $(LD)...'
+	@echo 'Updating $(LB)...'
 	@cd libdistributed && git pull -q
-	@echo '$(LD) up to date.'
+	@echo '$(LB) up to date.'
 	@echo 'Updating $(SC)...'
 	@cd $(SC) && git pull -q
 	@echo '$(SC) up to date.'
@@ -66,15 +76,16 @@ update:
 .PHONY: cleanish
 cleanish:
 	@rm -rf *.exe *.o *.stackdump *~
-	@cd $(LD) && rm -rf *.exe *.o *.stackdump *~
+	@cd $(LB) && rm -rf *.exe *.o *.stackdump *~
 	@cd $(SC) && rm -rf *.exe *.o *.stackdump *~
 	@echo 'Tidied up.'
 
 .PHONY: clean
 clean:
 	@rm -rf *.exe *.o *.stackdump *~
-	@rm -rf $(LD)
+	@rm -rf $(LB)
 	@rm -rf $(SC)
+	@rm -rf client
 	@echo 'Clean.'
 
 .PHONY: help
