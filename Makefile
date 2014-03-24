@@ -11,7 +11,7 @@ LBU := https://github.com/juliasets/libdistributed.git
 SCU := https://github.com/elizabethkilson/SpellCorrector.git
 
 .PHONY: default
-default: $(LB)/libdistributed.exe $(SC)/spellcorrector.exe client
+default: $(LB)/libdistributed.exe $(SC)/spellcorrector.exe utility.o client worker
 
 $(LB)/libdistributed.exe:
 # 	Ensure that the directory contains what it should
@@ -55,11 +55,17 @@ $(SC)/spellcorrector.exe:
 #	Actually run make
 	@cd $(SC) && $(MAKE);
 
-client: client.o utility.o
+client: client.o
 	$(LD) -o client client.o $(LB)/libdistributed.o utility.o
 
 client.o: client.cpp $(LB)/libdistributed.hpp
 	$(CC) client.cpp
+
+worker: worker.o
+	$(LD) -o worker worker.o $(LB)/libdistributed.o utility.o
+
+worker.o: worker.cpp $(LB)/libdistributed.hpp
+	$(CC) worker.cpp
 
 utility.o: $(LB)/utility.hpp $(LB)/utility_macros.hpp $(LB)/utility.cpp
 	$(CC) $(LB)/utility.cpp
@@ -86,6 +92,7 @@ clean:
 	@rm -rf $(LB)
 	@rm -rf $(SC)
 	@rm -rf client
+	@rm -rf worker
 	@echo 'Clean.'
 
 .PHONY: help

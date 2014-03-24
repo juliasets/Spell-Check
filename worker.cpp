@@ -25,21 +25,16 @@ int main (int argc, char* argv[])
     else
     {
         std::cout << "Right number of arguments!\n";
+        for (int i = 1; i < argc; i = i + 2)
+        {
+            node.join_network(argv[i],atoi(argv[i+1]));
+            std::cout << "1: " + (std::string)argv[i] + ", 2: " + (std::string)argv[i+1] << std::endl;
+        }
     }
 
-    //temporary example job info
-    std::string job_id = "id10532";
-    std::string job_msg = "This is some somple text.";
-    Job job;
-    job.service = "PING";
-    job.message = job_id + ": " + job_msg;
+    std::cout << "Starting Service: spellcheck\n";
+    node.provide_service("spellcheck");
 
-    std::cout << "Starting Service: unique job ID\n";
-    node.provide_service(job_id);
-
-    std::cout << "Sending job...\n";
-    node.send(job);
-
-    std::cout << "Rescinding Service: unique job ID\n";
-    node.rescind_service(job_id);
+    std::cout << "Waiting for job...\n";
+    node.accept();
 }
