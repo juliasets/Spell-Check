@@ -1,28 +1,58 @@
 SHELL := /bin/bash
 
-G := g++
+G  := g++
 
-CC := $(G) --std=c++11 -Wall -Wextra --pedantic -c
-LD := libdistributed
-SC := SpellCorrector
+CC  := $(G) --std=c++11 -Wall -Wextra --pedantic -c
+LD  := libdistributed
+SC  := SpellCorrector
+GC  := git clone -q
+LDU := https://github.com/juliasets/libdistributed.git
+SCU := https://github.com/elizabethkilson/SpellCorrector.git
 
 .PHONY: default
 default: $(LD)/libdistributed.exe $(SC)/spellcorrector.exe
 
 $(LD)/libdistributed.exe:
-	cd $(LD) && $(MAKE)
+# 	Ensure that the directory contains what it should
+	@if test -d "./$(LD)";  then \
+		if test ! -d "./$(LD)/.git";  then \
+			rm -rf $(LD); \
+			echo ''; \
+			echo 'Installing $(LD)...'; \
+			$(GC) $(LDU); \
+			echo 'Installed $(LD).'; \
+			echo ''; \
+		fi \
+	else \
+		echo ''; \
+		echo 'Installing $(LD)...'; \
+		$(GC) $(LDU); \
+		echo 'Installed $(LD)'.; \
+		echo ''; \
+	fi
+#	Actually run make
+	@cd $(LD) && $(MAKE)
 
 $(SC)/spellcorrector.exe:
-	cd $(SC) && $(MAKE)
-
-.PHONY: install
-install:
-	@echo 'Installing $(LD)...'
-	@git clone -q https://github.com/juliasets/libdistributed.git
-	@echo 'Installed $(LD)'
-	@echo 'Installing $(SC)...'
-	@git clone -q https://github.com/elizabethkilson/SpellCorrector.git
-	@echo 'Installed $(SC)'
+#	Ensure that the directory contains what it should
+	@if test -d "./$(SC)" ; then \
+		if test ! -d "./$(SC)/.git"; then \
+			rm -rf $(SC); \
+			echo ''; \
+			echo 'Installing $(SC).'; \
+			$(GC) $(SCU); \
+			echo 'Installed $(SC).'; \
+			echo ''; \
+		fi \
+	else \
+		echo ''; \
+		echo 'Installing $(SC)...'; \
+		$(GC) $(SCU); \
+		echo 'Installed $(SC).'; \
+		echo ''; \
+	fi
+#	Actually run make
+	@cd $(SC) && $(MAKE);
 
 .PHONY: update
 update:
@@ -46,3 +76,11 @@ clean:
 	@rm -rf $(LD)
 	@rm -rf $(SC)
 	@echo 'Clean.'
+
+.PHONY: help
+help:
+	@echo 'Usage:'
+	@echo 'make: compiles. If the necessary subdirectories are not installed, installs them.'
+	@echo 'make update: updates libdistributed and SpellCorrector libraries.'
+	@echo 'make clean: removes all compiled code and subdirectories.'
+	@echo 'make cleanish: removes all compiled code without removing subdirectories.'
