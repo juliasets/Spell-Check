@@ -36,5 +36,22 @@ int main (int argc, char* argv[])
     node.provide_service("spellcheck");
 
     std::cout << "Waiting for job...\n";
-    node.accept();
+    Job job = node.accept();
+
+    //Get ID from job message (delimiter should be changed later)
+    job.service = job.message.substr(0, job.message.find(": "));
+    std::string job_msg = job.message.substr(job.message.find(": "));
+
+    job.message = std::string ( job_msg.rbegin(), job_msg.rend() );
+
+    std::cout << "Starting Service: unique job ID\n";
+    node.provide_service(job.service);
+
+    std::cout << "Sending finished job...\n";
+    node.send(job);
+
+    std::cout << "Rescinding Service: unique job ID\n";
+    node.rescind_service(job.service);
+
+    std::cout << "Job sent.\n";
 }
