@@ -25,7 +25,9 @@ int main (int argc, char* argv[])
     else
     {
         std::cout << "Right number of arguments!\n";
+        std::cout << "Joining network...\n";
         node.join_network(argv[1],atoi(argv[2]));
+        std::cout << "Joined network...\n";
     }
 
     //temporary example job info
@@ -40,6 +42,8 @@ int main (int argc, char* argv[])
 
     std::cout << "Sending job...\n";
     node.send(job);
+
+    Job job_out = node.accept();
 
     std::cout << "Rescinding Service: unique job ID\n";
     node.rescind_service(job_id);

@@ -27,7 +27,9 @@ int main (int argc, char* argv[])
         std::cout << "Right number of arguments!\n";
         for (int i = 1; i < argc; i = i + 2)
         {
+            std::cout << "Joining network...\n";
             node.join_network(argv[i],atoi(argv[i+1]));
+            std::cout << "Joined network: \n";
             std::cout << "1: " + (std::string)argv[i] + ", 2: " + (std::string)argv[i+1] << std::endl;
         }
     }
@@ -37,6 +39,10 @@ int main (int argc, char* argv[])
 
     std::cout << "Waiting for job...\n";
     Job job = node.accept();
+    std::cout << "Got job...\n";
+
+    std::cout << "Rescinding Service: spellcheck\n";
+    node.rescind_service("spellcheck");
 
     //Get ID from job message (delimiter should be changed later)
     job.service = job.message.substr(0, job.message.find(": "));
@@ -44,14 +50,8 @@ int main (int argc, char* argv[])
 
     job.message = std::string ( job_msg.rbegin(), job_msg.rend() );
 
-    std::cout << "Starting Service: unique job ID\n";
-    node.provide_service(job.service);
-
     std::cout << "Sending finished job...\n";
     node.send(job);
-
-    std::cout << "Rescinding Service: unique job ID\n";
-    node.rescind_service(job.service);
 
     std::cout << "Job sent.\n";
 }
