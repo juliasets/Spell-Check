@@ -9,9 +9,10 @@ SC  := SpellCorrector
 GC  := git clone -q
 LBU := https://github.com/juliasets/libdistributed.git
 SCU := https://github.com/elizabethkilson/SpellCorrector.git
+LIBS := -lboost_system -pthread -lsqlite3
 
 .PHONY: default
-default: $(LB)/libdistributed.exe $(SC)/spellcorrector.exe utility.o client worker
+default: $(LB)/libdistributed.exe $(SC)/spellcorrector.exe utility.o client slave
 
 $(LB)/libdistributed.exe:
 # 	Ensure that the directory contains what it should
@@ -56,13 +57,13 @@ $(SC)/spellcorrector.exe:
 	@cd $(SC) && $(MAKE);
 
 client: SpellCheckClient.o
-	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LB)/libdistributed.o utility.o
+	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LB)/Client.o utility.o ../$(LB)/skein/*.o $(LIBS)
 
 SpellCheckClient.o: SpellCheckClient.cpp $(LB)/Client.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckClient.cpp
 
 slave: SpellCheckSlave.o
-	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCheck.o threadedSpellCorrector.o corrector.o string_functions.o $(LB)/libdistributed.o utility.o
+	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LB)/Slave.o utility.o ../$(LB)/skein/*.o $(LIBS)
 
 SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckSlave.cpp

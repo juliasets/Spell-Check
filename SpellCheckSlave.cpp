@@ -66,7 +66,7 @@ int main ()
             
             while (ss >> input)
             {
-                output = correct(input, corr, first, db);
+                output = correct(input, corr, first, db, &tpool);
                 
                 std::stringstream ss2 (output);
                 result = result + output + " ";

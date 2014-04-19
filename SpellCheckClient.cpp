@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 #include <fstream>
-
+#include <list>
 #include <time.h>
 
 using namespace Distributed;
@@ -75,6 +75,7 @@ int main ()
     std::string phrase;
     std::string word;
     bool end;
+    int i = 0;
     while (in>>word)
     {
         end = false;
@@ -100,6 +101,7 @@ int main ()
             _utility::log.flush();
             return 1;
         }
+        i++;
     }
     
     std::string outfilename = "output.txt";
