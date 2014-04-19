@@ -55,17 +55,17 @@ $(SC)/spellcorrector.exe:
 #	Actually run make
 	@cd $(SC) && $(MAKE);
 
-client: client.o
-	$(LD) -o client client.o $(LB)/libdistributed.o utility.o
+client: SpellCheckClient.o
+	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LB)/libdistributed.o utility.o
 
-client.o: client.cpp $(LB)/libdistributed.hpp
-	$(CC) client.cpp
+SpellCheckClient.o: SpellCheckClient.cpp $(LB)/libdistributed.hpp
+	$(CC) SpellCheckClient.cpp
 
-worker: worker.o
-	$(LD) -o worker worker.o $(LB)/libdistributed.o utility.o
+slave: SpellCheckSlave.o
+	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCheck.o threadedSpellCorrector.o corrector.o string_functions.o $(LB)/libdistributed.o utility.o
 
-worker.o: worker.cpp $(LB)/libdistributed.hpp
-	$(CC) worker.cpp
+SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/libdistributed.hpp
+	$(CC) SpellCheckSlave.cpp
 
 utility.o: $(LB)/utility.hpp $(LB)/utility_macros.hpp $(LB)/utility.cpp
 	$(CC) $(LB)/utility.cpp
