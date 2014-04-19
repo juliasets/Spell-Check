@@ -1,7 +1,7 @@
 
-#include "Client.hpp"
+#include "../libdistributed/Client.hpp"
 
-#include "utility.hpp"
+#include "../libdistributed/utility.hpp"
 
 #include <iostream>
 #include <sstream>

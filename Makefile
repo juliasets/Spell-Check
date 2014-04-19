@@ -58,13 +58,13 @@ $(SC)/spellcorrector.exe:
 client: SpellCheckClient.o
 	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LB)/libdistributed.o utility.o
 
-SpellCheckClient.o: SpellCheckClient.cpp $(LB)/libdistributed.hpp
+SpellCheckClient.o: SpellCheckClient.cpp $(LB)/Client.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckClient.cpp
 
 slave: SpellCheckSlave.o
 	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCheck.o threadedSpellCorrector.o corrector.o string_functions.o $(LB)/libdistributed.o utility.o
 
-SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/libdistributed.hpp
+SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckSlave.cpp
 
 utility.o: $(LB)/utility.hpp $(LB)/utility_macros.hpp $(LB)/utility.cpp

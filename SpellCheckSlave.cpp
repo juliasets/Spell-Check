@@ -1,11 +1,11 @@
 
-#include "Slave.hpp"
+#include "../libdistributed/Slave.hpp"
 
-#include "utility.hpp"
+#include "../libdistributed/utility.hpp"
 
 #include "../SpellCorrector/threadedSpellCorrector.h"
 
-#include "ThreadPool.hpp"
+#include "../libdistributed/ThreadPool.hpp"
 
 #include <iostream>
 #include <sstream>
