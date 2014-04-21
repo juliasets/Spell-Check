@@ -4,8 +4,8 @@ G  := g++
 
 CC  := $(G) --std=c++11 -Wall -Wextra --pedantic -c
 LD  := $(G) --std=c++11 -Wall -Wextra --pedantic -lboost_system -pthread
-LB  := libdistributed
-SC  := SpellCorrector
+LB  := ../libdistributed
+SC  := ../SpellCorrector
 GC  := git clone -q
 LBU := https://github.com/juliasets/libdistributed.git
 SCU := https://github.com/elizabethkilson/SpellCorrector.git
@@ -56,14 +56,22 @@ $(SC)/spellcorrector.exe:
 #	Actually run make
 	@cd $(SC) && $(MAKE);
 
+.PHONY: test
+test: master-test slave client
+	./master-test | ./SpellCheckSlave.exe | ./SpellCheckSlave.exe | ./SpellCheckSlave.exe | ./SpellCheckClient.exe | ./SpellCheckClient.exe | ./SpellCheckClient.exe
+
+master-test: Master-test.cpp $(LB)/Master.o $(LB)/Master.hpp utility.o
+	$(CC) Master-test.cpp
+	$(LD) -o master-test Master-test.o $(LB)/Master.o utility.o $(LB)/skein/*.o $(LIBS)
+
 client: SpellCheckClient.o
-	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LB)/Client.o utility.o ../$(LB)/skein/*.o $(LIBS)
+	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LB)/Client.o utility.o $(LB)/skein/*.o $(LIBS)
 
 SpellCheckClient.o: SpellCheckClient.cpp $(LB)/Client.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckClient.cpp
 
 slave: SpellCheckSlave.o
-	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LB)/Slave.o utility.o ../$(LB)/skein/*.o $(LIBS)
+	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LB)/Slave.o utility.o $(LB)/skein/*.o $(LIBS)
 
 SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckSlave.cpp

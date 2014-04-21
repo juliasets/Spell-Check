@@ -1,4 +1,5 @@
 
+
 #include "../libdistributed/Client.hpp"
 
 #include "../libdistributed/utility.hpp"
@@ -83,10 +84,11 @@ int main ()
         while (!end)
         {
             in>>word;
-            phrase += format_word(word, &end);
+            phrase += " " + format_word(word, &end);
         }
-        
-        jobs.emplace_back(new ClientJob(client));
+        _utility::log.o << "phrase: " << phrase << std::endl;
+        _utility::log.flush();
+        jobs.emplace_back(new ClientJob(client, ClientJob(client)));
         if (!*jobs[i])
         {
             _utility::log.o << "Couldn't get slave from master." << std::endl;
@@ -110,7 +112,7 @@ int main ()
     for (auto & job : jobs)
     {
         std::string result;
-        if (job->get_result(10000, result))
+        if (job->get_result(100000, result))
         {
             out<<result<<" ";
             _utility::log.o << "ClientJob (" << job->port() <<
