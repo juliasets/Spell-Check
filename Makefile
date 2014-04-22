@@ -58,7 +58,7 @@ $(SC)/spellcorrector.exe:
 
 .PHONY: test
 test: master-test slave client
-	./master-test | ./SpellCheckSlave.exe | ./SpellCheckSlave.exe | ./SpellCheckSlave.exe | ./SpellCheckClient.exe | ./SpellCheckClient.exe | ./SpellCheckClient.exe
+	./master-test | ./SpellCheckSlave.exe | ./SpellCheckClient.exe
 
 master-test: Master-test.cpp $(LB)/Master.o $(LB)/Master.hpp utility.o
 	$(CC) Master-test.cpp

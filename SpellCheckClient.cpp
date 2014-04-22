@@ -66,7 +66,7 @@ int main ()
     sleep(1);
 
     Client client("p455w0rd");
-    client.add_master("localhost", masterport);
+    client.add_master("127.0.0.1", masterport);
 
     std::vector< std::unique_ptr<ClientJob> > jobs;
     
@@ -88,7 +88,7 @@ int main ()
         }
         _utility::log.o << "phrase: " << phrase << std::endl;
         _utility::log.flush();
-        jobs.emplace_back(new ClientJob(client, ClientJob(client)));
+        jobs.emplace_back(new ClientJob(client));
         if (!*jobs[i])
         {
             _utility::log.o << "Couldn't get slave from master." << std::endl;
