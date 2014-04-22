@@ -9,12 +9,12 @@ SC  := ../SpellCorrector
 GC  := git clone -q
 LBU := https://github.com/juliasets/libdistributed.git
 SCU := https://github.com/elizabethkilson/SpellCorrector.git
-LIBS := -lboost_system -pthread -lsqlite3
+LIBS := -L$(LB) -ldistributed -lboost_system -pthread -lsqlite3
 
 .PHONY: default
-default: $(LB)/libdistributed.exe $(SC)/spellcorrector.exe utility.o client slave
+default: $(LB)/libdistributed.a $(SC)/spellcorrector.exe client slave
 
-$(LB)/libdistributed.exe:
+$(LB)/libdistributed.a:
 # 	Ensure that the directory contains what it should
 	@if test -d "./$(LB)";  then \
 		if test ! -d "./$(LB)/.git";  then \
@@ -33,7 +33,7 @@ $(LB)/libdistributed.exe:
 		echo ''; \
 	fi
 #	Actually run make
-	@cd $(LB) && $(MAKE)
+	@cd $(LB) && $(MAKE) libdistributed.a
 
 $(SC)/spellcorrector.exe:
 #	Ensure that the directory contains what it should
@@ -60,24 +60,22 @@ $(SC)/spellcorrector.exe:
 test: master-test slave client
 	./master-test | ./SpellCheckSlave.exe | ./SpellCheckClient.exe
 
-master-test: Master-test.cpp $(LB)/Master.o $(LB)/Master.hpp utility.o
+master-test: Master-test.cpp $(LB)/Master.o $(LB)/Master.hpp
 	$(CC) Master-test.cpp
-	$(LD) -o master-test Master-test.o $(LB)/Master.o utility.o $(LB)/skein/*.o $(LIBS)
+	$(LD) -o master-test Master-test.o $(LIBS)
 
 client: SpellCheckClient.o
-	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LB)/Client.o utility.o $(LB)/skein/*.o $(LIBS)
+	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LIBS)
 
 SpellCheckClient.o: SpellCheckClient.cpp $(LB)/Client.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckClient.cpp
 
 slave: SpellCheckSlave.o
-	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LB)/Slave.o utility.o $(LB)/skein/*.o $(LIBS)
+	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
 
 SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckSlave.cpp
 
-utility.o: $(LB)/utility.hpp $(LB)/utility_macros.hpp $(LB)/utility.cpp
-	$(CC) $(LB)/utility.cpp
 
 .PHONY: update
 update:
