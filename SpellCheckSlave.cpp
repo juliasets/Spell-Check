@@ -55,13 +55,13 @@ int main ()
     if (rc)
     {
         _utility::log.o << "Slave: Can't open database." << std::endl;
-	_utility::log.flush();
+        _utility::log.flush();
         return 1;
     }
     else
     {
-	_utility::log.o << "Slave: Database opened." << std::endl;
-	_utility::log.flush();
+        _utility::log.o << "Slave: Database opened." << std::endl;
+        _utility::log.flush();
     }
     
     std::string input;
@@ -75,24 +75,26 @@ int main ()
     {
         SlaveJob job;
 
-	_utility::log.o << "Slave: job created." << std::endl;
-	_utility::log.flush();
+        _utility::log.o << "Slave: job created." << std::endl;
+        _utility::log.flush();
 
         if (slave.serve(job))
-	{
+        {
             _utility::log.o << std::endl << "Received job." << std::endl << std::endl;
             _utility::log.flush();
             
-            ss.str(std::string());
             result = "";
             first = cmd_begin; //macro defined in threadedSpellCorrector.h
             
-            ss << job.get_job();
-            _utility::log.o << "Received job" << ss.str() << std::endl;
+            ss.clear();
+            ss.str(job.get_job());
+            _utility::log.o << "Received job: " << ss.str() << std::endl;
             while (ss >> input)
             {
+		_utility::log.o << "Correcting: " << input << std::endl;
+		_utility::log.flush();
                 output = correct(input, corr, first, db, &tpool);
-                _utility::log.o << "Slave working "<< output << std::endl;
+                _utility::log.o << "Slave working: "<< output << std::endl;
                 _utility::log.flush();
                 std::stringstream ss2 (output);
                 result = result + output + " ";
@@ -102,7 +104,7 @@ int main ()
             job.send_result(result);
             _utility::log.o << "Sent job: " << result <<std::endl;
             _utility::log.flush();
-	}
+        }
         _utility::log.o << "Slave serve returned" << std::endl;
         _utility::log.flush();
     }
