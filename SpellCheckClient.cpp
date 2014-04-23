@@ -67,12 +67,15 @@ int main ()
 
     Client client("p455w0rd");
     client.add_master("127.0.0.1", masterport);
-
+    
     std::vector< std::unique_ptr<ClientJob> > jobs;
     
     std::string filename = "test.txt";
     std::ifstream in( filename.c_str(), std::ios_base::in);
-    
+
+    _utility::log.o << "Client: " << filename << std::endl;
+    _utility::log.flush();
+
     std::string phrase;
     std::string word;
     bool end;
