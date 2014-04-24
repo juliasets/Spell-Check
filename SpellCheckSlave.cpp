@@ -14,15 +14,25 @@ using namespace Distributed;
 
 using namespace SpellCorrector;
 
-
-int main ()
+void usage ()
 {
+    std::cerr << "Usage: SpellCheckSlave host port" << std::endl;
+}
+
+int main (int argc, char* argv[])
+{
+    if (argc != 3)
+    {
+        usage();
+        std::exit(EXIT_FAILURE);
+    }
+    std::string masterhost;
     unsigned short masterport;
-    std::cin >> masterport;
-    std::cout << masterport << std::endl; // Pass master port to next slave.
+    masterhost = argv[1];
+    masterport = strtol(argv[2],NULL,0);
 
     Slave slave("p455w0rd");
-    slave.add_master("127.0.0.1", masterport);
+    slave.add_master(masterhost, masterport);
 
     _utility::log.o << "Slave: " << slave.port() << std::endl;
     _utility::log.flush();

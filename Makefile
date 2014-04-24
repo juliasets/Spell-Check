@@ -58,7 +58,7 @@ $(SC)/spellcorrector.exe:
 
 .PHONY: test
 test: master-test slave client
-	./master-test | ./SpellCheckSlave.exe | ./SpellCheckClient.exe
+	./master-test & ./SpellCheckClient.exe 127.0.0.1 30000 & ./SpellCheckSlave.exe 127.0.0.1 30000 &
 
 master-test: Master-test.cpp $(LB)/Master.o $(LB)/Master.hpp
 	$(CC) Master-test.cpp
@@ -76,6 +76,9 @@ slave: SpellCheckSlave.o
 SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckSlave.cpp
 
+.PHONY: killtest
+killtest: 
+	pkill SpellCheckSlave & pkill SpellCheckClien & pkill master-test &
 
 .PHONY: update
 update:

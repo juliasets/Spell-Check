@@ -57,16 +57,27 @@ std::string format_word(std::string word, bool * end)
     return result.str();
 }
 
-int main ()
+void usage ()
 {
+    std::cerr << "Usage: SpellCheckClient host port" << std::endl;
+}
+
+int main (int argc, char* argv[])
+{
+    if (argc != 3)
+    {
+        usage();
+        std::exit(EXIT_FAILURE);
+    }
+    std::string masterhost;
     unsigned short masterport;
-    std::cin >> masterport;
-    std::cout << masterport << std::endl; // Pass master port to next client.
+    masterhost = argv[1];
+    masterport = strtol(argv[2],NULL,0);
 
     sleep(1);
 
     Client client("p455w0rd");
-    client.add_master("127.0.0.1", masterport);
+    client.add_master(masterhost, masterport);
     
     std::vector< std::unique_ptr<ClientJob> > jobs;
     
