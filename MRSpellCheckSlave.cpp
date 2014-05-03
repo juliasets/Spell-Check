@@ -2,6 +2,15 @@
 
 #include "../libdistributed/utility.hpp"
 
+#include "../libdistributed/Slave.hpp"
+
+#include "../SpellCorrector/threadedSpellCorrector.h"
+
+#include "../libdistributed/ThreadPool.hpp"
+
+#include "MRmacros.hpp"
+
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -9,6 +18,10 @@
 #include <list>
 #include <time.h>
 #include <stdio.h>
+#include <thread>
+
+using namespace SpellCorrector;
+
 
 std::string format_word(std::string word, bool * end)
 {
@@ -39,7 +52,7 @@ std::string format_word(std::string word, bool * end)
     return result.str();
 }
 
-void performJobs(std::list<std::string> filenames, std::mutex queueLock)
+void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
 {
     ThreadPool tpool (4);
     
@@ -66,19 +79,25 @@ void performJobs(std::list<std::string> filenames, std::mutex queueLock)
     std::string word;
     bool end;
     
+    std::string input;
     std::string output;
     std::string first;
     std::stringstream ss;
     
     while (true)
     {
-        if (filenames.empty())
+        queueLock->lock();
+        if (filenames->empty())
         {
+            queueLock->unlock();
             sleep(0.05);
             continue;
         }
         
-        std::string origFilename = filenames.pop_front();
+        std::string origFilename = filenames->front();
+        filenames->pop_front();
+        queueLock->unlock();
+        
         std::string workingFilename = "tmp-" + origFilename;
         std::string finishedFilename = "processed-" + origFilename;
         
@@ -108,15 +127,35 @@ void performJobs(std::list<std::string> filenames, std::mutex queueLock)
             out << std::endl;
         }
         
-        rename( workingFilename, finishedFilename);
+        rename( workingFilename.c_str(), finishedFilename.c_str());
     }
+}
+
+bool accept_chunk(std::stringstream * message, std::string key)
+{
+	int noLines;
+	(*message) >> noLines;
+	int count = 0;
+	
+	std::ofstream file ( key.c_str() );
+	std::string line;
+	
+	while (std::getline((*message), line))
+	{
+		file << line << std::endl;
+		count++;
+	}
+	
+	if (count == noLines)
+		return true;
+	return false;
 }
 
 int main (int argc, char* argv[])
 {
     if (argc != 3)
     {
-        usage();
+        //usage();
         std::exit(EXIT_FAILURE);
     }
     std::string masterhost;
@@ -130,18 +169,59 @@ int main (int argc, char* argv[])
     _utility::log.o << "Slave: " << slave.port() << std::endl;
     _utility::log.flush();
     
+    std::list<std::string> filenames;
+    std::mutex queueLock;
+    
+    std::thread processor (performJobs, &filenames, &queueLock);
+    
     for (;;)
     {
         SlaveJob job;
 
         if (slave.serve(job))
         {
-            
+            std::stringstream message (job.get_job());
+	        int jobType;
+	        message >> jobType;
+	        std::string key;
+	        message >> key;
+	        switch (jobType)
+	        {
+		        case ACCEPT_CHUNK:
+			        if (!accept_chunk(&message, key))
+			        {
+				        job.send_result(ERROR_MESSAGE);
+				        break;
+			        }
+			        job.send_result(RECEIVED_MESSAGE);
+			        
+			        queueLock.lock();
+			        filenames.push_back(key);
+			        queueLock.unlock();
+			        break;
+			        
+		        case RETURN_CHUNK_RESULT:
+		            std::ifstream resultFile ( ("processed-" + key).c_str() );
+		            if (resultFile.is_open()) {
+		                resultFile.seekg (0, resultFile.end);
+                        int length = resultFile.tellg();
+                        resultFile.seekg (0, resultFile.beg);
+                        
+                        char * buffer = new char [length];
+                        resultFile.read (buffer,length);
+
+                        resultFile.close();
+                        
+                        std::string result (buffer);
+                        
+                        job.send_result(result);
+                        break;
+		            }
+		            job.send_result(WAITING_MESSAGE);
+			        break;
+	        }
         }
     }
-    
-    
-    
 }
 
 
