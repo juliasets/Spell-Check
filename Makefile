@@ -66,7 +66,7 @@ $(SC)/spellcorrector.exe:
 
 .PHONY: test
 test: master-test slave client
-	./master-test & ./SpellCheckClient 127.0.0.1 30000 & ./SpellCheckSlave 127.0.0.1 30000 &
+	./master-test & ./SpellCheckClient 127.0.0.1 30000 & ./MRSpellCheckSlave 127.0.0.1 30000 &
 
 master-test: Master-test.cpp $(LB)/Master.o $(LB)/Master.hpp
 	$(CC) Master-test.cpp
@@ -78,15 +78,15 @@ client: SpellCheckClient.o
 SpellCheckClient.o: SpellCheckClient.cpp $(LB)/Client.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckClient.cpp
 
-slave: SpellCheckSlave.o
-	$(LD) -o SpellCheckSlave SpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
+slave: MRSpellCheckSlave.o
+	$(LD) -o MRSpellCheckSlave MRSpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
 
-SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
-	$(CC) SpellCheckSlave.cpp
+MRSpellCheckSlave.o: MRSpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
+	$(CC) MRSpellCheckSlave.cpp
 
 .PHONY: killtest
 killtest: 
-	pkill SpellCheckSlave & pkill SpellCheckClient & pkill master-test &
+	pkill MRSpellCheckSlave & pkill SpellCheckClient & pkill master-test &
 
 .PHONY: update
 update:
@@ -100,7 +100,7 @@ update:
 .PHONY: cleanish
 cleanish:
 	@rm -rf *.exe *.o *.stackdump *~
-	@rm -f master-test SpellCheckClient SpellCheckSlave
+	@rm -f master-test SpellCheckClient MRSpellCheckSlave
 	@cd $(LB) && rm -rf *.exe *.o *.stackdump *~
 	@cd $(SC) && rm -rf *.exe *.o *.stackdump *~
 	@echo 'Tidied up.'
@@ -108,7 +108,7 @@ cleanish:
 .PHONY: clean
 clean:
 	@rm -rf *.exe *.o *.stackdump *~
-	@rm -f master-test SpellCheckClient SpellCheckSlave fi
+	@rm -f master-test SpellCheckClient MRSpellCheckSlave
 	@rm -rf $(LB)
 	@rm -rf $(SC)
 	@rm -rf client
