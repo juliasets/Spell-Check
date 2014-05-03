@@ -85,38 +85,27 @@ int main (int argc, char* argv[])
     {
         SlaveJob job;
 
-        _utility::log.o << "Slave: job created." << std::endl;
-        _utility::log.flush();
-
         if (slave.serve(job))
         {
-            _utility::log.o << std::endl << "Received job." << std::endl << std::endl;
-            _utility::log.flush();
-            
             result = "";
             first = cmd_begin; //macro defined in threadedSpellCorrector.h
             
             ss.clear();
             ss.str(job.get_job());
             _utility::log.o << "Received job: " << ss.str() << std::endl;
+            _utility::log.flush();
             while (ss >> input)
             {
-		_utility::log.o << "Correcting: " << input << std::endl;
-		_utility::log.flush();
                 output = correct(input, corr, first, db, &tpool);
-                _utility::log.o << "Slave working: "<< output << std::endl;
-                _utility::log.flush();
                 std::stringstream ss2 (output);
                 result = result + output + " ";
                 while (ss2 >> first);
             }
             
             job.send_result(result);
-            _utility::log.o << "Sent job: " << result <<std::endl;
+            _utility::log.o << "Sent result: " << result <<std::endl;
             _utility::log.flush();
         }
-        _utility::log.o << "Slave serve returned" << std::endl;
-        _utility::log.flush();
     }
     
     tpool.shutdown();

@@ -93,31 +93,29 @@ int main (int argc, char* argv[])
     int i = 0;
     while (in>>word)
     {
-	end = false;
-	phrase = format_word(word, &end);
-	while (!end)
+	    end = false;
+	    phrase = format_word(word, &end);
+	    while (!end)
         {
-	    in>>word;
-	    phrase += " " + format_word(word, &end);
+	        in>>word;
+	        phrase += " " + format_word(word, &end);
         }
-	_utility::log.o << "phrase: " << phrase << std::endl;
-	_utility::log.flush();
-	jobs.emplace_back(new ClientJob(client));
-	if (!*jobs[i])
-        {
-	    _utility::log.o << "Couldn't get slave from master." << std::endl;
+	    jobs.emplace_back(new ClientJob(client));
+	    if (!*jobs[i])
+            {
+	        _utility::log.o << "Couldn't get slave from master." << std::endl;
+	        _utility::log.flush();
+	        return 1;
+            }
+	    _utility::log.o << "ClientJob: " << jobs[i]->port() << std::endl;
 	    _utility::log.flush();
-	    return 1;
-        }
-	_utility::log.o << "ClientJob: " << jobs[i]->port() << std::endl;
-	_utility::log.flush();
-	if (!jobs[i]->send_job(phrase))
-        {
-	    _utility::log.o << "Couldn't send job to slave." << std::endl;
-	    _utility::log.flush();
-	    return 1;
-        }
-	i++;
+	    if (!jobs[i]->send_job(phrase))
+            {
+	        _utility::log.o << "Couldn't send job to slave." << std::endl;
+	        _utility::log.flush();
+	        return 1;
+            }
+	    i++;
     }
     
     std::string outfilename = "output.txt";
