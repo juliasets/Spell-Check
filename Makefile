@@ -12,7 +12,7 @@ SCU := https://github.com/elizabethkilson/SpellCorrector.git
 LIBS := -L$(LB) -ldistributed -lboost_system -pthread -lsqlite3
 
 .PHONY: default
-default: $(LB)/libdistributed.a $(SC)/spellcorrector.exe client slave
+default:  $(LB)/libdistributed.a $(SC)/spellcorrector.exe master-test client slave
 
 $(LB)/libdistributed.a:
 # 	Ensure that the directory contains what it should
@@ -100,6 +100,7 @@ update:
 .PHONY: cleanish
 cleanish:
 	@rm -rf *.exe *.o *.stackdump *~
+	@rm -f master-test SpellCheckClient SpellCheckSlave
 	@cd $(LB) && rm -rf *.exe *.o *.stackdump *~
 	@cd $(SC) && rm -rf *.exe *.o *.stackdump *~
 	@echo 'Tidied up.'
@@ -107,6 +108,7 @@ cleanish:
 .PHONY: clean
 clean:
 	@rm -rf *.exe *.o *.stackdump *~
+	@rm -f master-test SpellCheckClient SpellCheckSlave fi
 	@rm -rf $(LB)
 	@rm -rf $(SC)
 	@rm -rf client
