@@ -16,19 +16,23 @@ default: $(LB)/libdistributed.a $(SC)/spellcorrector.exe client slave
 
 $(LB)/libdistributed.a:
 # 	Ensure that the directory contains what it should
-	@if test -d "./$(LB)";  then \
+	@if test -d "$(LB)";  then \
 		if test ! -d "./$(LB)/.git";  then \
 			rm -rf $(LB); \
 			echo ''; \
 			echo 'Installing $(LB)...'; \
+			cd ..; \
 			$(GC) $(LBU); \
+			cd Spell-Check; \
 			echo 'Installed $(LB).'; \
 			echo ''; \
 		fi \
 	else \
 		echo ''; \
 		echo 'Installing $(LB)...'; \
+		cd ..; \
 		$(GC) $(LBU); \
+		cd Spell-Check; \
 		echo 'Installed $(LB)'.; \
 		echo ''; \
 	fi
@@ -37,19 +41,23 @@ $(LB)/libdistributed.a:
 
 $(SC)/spellcorrector.exe:
 #	Ensure that the directory contains what it should
-	@if test -d "./$(SC)" ; then \
+	@if test -d "$(SC)" ; then \
 		if test ! -d "./$(SC)/.git"; then \
 			rm -rf $(SC); \
 			echo ''; \
 			echo 'Installing $(SC).'; \
+			cd ..; \
 			$(GC) $(SCU); \
+			cd Spell-Check; \
 			echo 'Installed $(SC).'; \
 			echo ''; \
 		fi \
 	else \
 		echo ''; \
 		echo 'Installing $(SC)...'; \
+		cd ..; \
 		$(GC) $(SCU); \
+		cd Spell-Check; \
 		echo 'Installed $(SC).'; \
 		echo ''; \
 	fi
