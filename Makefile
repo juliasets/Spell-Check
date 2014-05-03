@@ -58,27 +58,27 @@ $(SC)/spellcorrector.exe:
 
 .PHONY: test
 test: master-test slave client
-	./master-test & ./SpellCheckClient.exe 127.0.0.1 30000 & ./SpellCheckSlave.exe 127.0.0.1 30000 &
+	./master-test & ./SpellCheckClient 127.0.0.1 30000 & ./SpellCheckSlave 127.0.0.1 30000 &
 
 master-test: Master-test.cpp $(LB)/Master.o $(LB)/Master.hpp
 	$(CC) Master-test.cpp
 	$(LD) -o master-test Master-test.o $(LIBS)
 
 client: SpellCheckClient.o
-	$(LD) -o SpellCheckClient.exe SpellCheckClient.o $(LIBS)
+	$(LD) -o SpellCheckClient SpellCheckClient.o $(LIBS)
 
 SpellCheckClient.o: SpellCheckClient.cpp $(LB)/Client.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckClient.cpp
 
 slave: SpellCheckSlave.o
-	$(LD) -o SpellCheckSlave.exe SpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
+	$(LD) -o SpellCheckSlave SpellCheckSlave.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
 
 SpellCheckSlave.o: SpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 	$(CC) SpellCheckSlave.cpp
 
 .PHONY: killtest
 killtest: 
-	pkill SpellCheckSlave & pkill SpellCheckClien & pkill master-test &
+	pkill SpellCheckSlave & pkill SpellCheckClient & pkill master-test &
 
 .PHONY: update
 update:
