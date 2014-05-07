@@ -98,6 +98,8 @@ void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
         filenames->pop_front();
         queueLock->unlock();
         
+        std::cout<<"Slave working on: "<<origFilename<<std::endl;
+        
         std::string workingFilename = "tmp-" + origFilename;
         std::string finishedFilename = "processed-" + origFilename;
         
@@ -122,6 +124,7 @@ void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
                 output = correct(input, corr, first, db, &tpool);
                 std::stringstream ss2 (output);
                 out << output << " ";
+                std::cout<<"Corrected "<<input<<" to "<<output<<std::endl;
                 while (ss2 >> first);
             }
             out << std::endl;
@@ -146,8 +149,9 @@ bool accept_chunk(std::stringstream * message, std::string key)
 		count++;
 	}
 	
-	if (count == noLines)
+	if (count == noLines + 2)
 		return true;
+	std::cout<<"Mismatched line numbers: "<<count<<" "<<noLines<<std::endl;
 	return false;
 }
 
@@ -206,6 +210,8 @@ int main (int argc, char* argv[])
 		                resultFile.seekg (0, resultFile.end);
                         int length = resultFile.tellg();
                         resultFile.seekg (0, resultFile.beg);
+                        std::cout<<"File name: "<<"processed-"<<key<<std::endl;
+                        std::cout<<"File size: "<<length<<std::endl;
                         
                         char * buffer = new char [length];
                         resultFile.read (buffer,length);
@@ -213,6 +219,8 @@ int main (int argc, char* argv[])
                         resultFile.close();
                         
                         std::string result (buffer);
+                        
+                        std::cout<<"Slave returning result: "<<result<<std::endl;
                         
                         job.send_result(result);
                         break;
