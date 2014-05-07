@@ -86,7 +86,7 @@ MRSpellCheckSlave.o: MRSpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 
 .PHONY: killtest
 killtest: 
-	pkill MRSpellCheckSla & pkill MRSpellCheckClient & pkill master-test &
+	pkill MRSpellCheckSla & pkill MRSpellCheckCli & pkill master-test &
 
 .PHONY: update
 update:
@@ -96,6 +96,11 @@ update:
 	@echo 'Updating $(SC)...'
 	@cd $(SC) && git pull -q
 	@echo '$(SC) up to date.'
+
+.PHONY: wipe 
+wipe:
+	@rm -f processed-* test.txt-* output.txt 
+	@echo 'Got rid of non-input text files.'
 
 .PHONY: cleanish
 cleanish:
