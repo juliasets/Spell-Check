@@ -123,35 +123,35 @@ int main (int argc, char* argv[])
 	{
 	    if(!result.compare(ERROR_MESSAGE))
 	    {
-		while (!(result.compare(ERROR_MESSAGE))
-		{
-		    _utility::log.o << "ClientJob (" << jobs[k]->port() << ") failed: message not received by slave." << std::endl;
-		    _utility::log.flush();          
-		
-		    // rewrite message
-		    std::stringstream message("");
-		    message << ACCEPT_CHUNK << "\n";
-		    message << filename << time(NULL) << rand_key << k << "\n";
-		
-		    in.open(filename.c_str());
-		    in.seekg(positions[k]);
-		    std::stringstream chunk = ("");
-		    int chunk_lines = 0;
-		    for (int i = 0; i < max_lines && !in.eof(); ++i)
+		    while (!(result.compare(ERROR_MESSAGE)))
 		    {
-			std::string line;
-			getline(in, line);
-			chunk << line << "\n";
-			chunk_lines = i+1;
-		    }
-		    message << chunk_lines << "\n";
-		    message << chunk.str() << "\n";
+		        _utility::log.o << "ClientJob (" << jobs[k]->port() << ") failed: message not received by slave." << std::endl;
+		        _utility::log.flush();          
 		
-		    jobs[k] = new ClientJob(client);
-		    jobs[k]->send_job(message.str());
-                    //TODO: check response from send job
-		    jobs[k]->get_result(100000, result);
-		}
+		        // rewrite message
+		        std::stringstream message;
+		        message << ACCEPT_CHUNK << "\n";
+		        message << filename << time(NULL) << rand_key << k << "\n";
+		
+		        in.open(filename.c_str());
+		        in.seekg(positions[k]);
+		        std::stringstream chunk;
+		        int chunk_lines = 0;
+		        for (int i = 0; i < max_lines && !in.eof(); ++i)
+		        {
+			        std::string line;
+			        getline(in, line);
+			        chunk << line << "\n";
+			        chunk_lines = i+1;
+		        }
+		        message << chunk_lines << "\n";
+		        message << chunk.str() << "\n";
+		
+		        jobs[k] = std::auto_ptr<ClientJob>(new ClientJob(client));
+		        jobs[k]->send_job(message.str());
+                        //TODO: check response from send job
+		        jobs[k]->get_result(100000, result);
+		    }
 		
 	    }	
 	    else if (!result.compare(RECEIVED_MESSAGE))
