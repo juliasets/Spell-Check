@@ -105,7 +105,7 @@ update:
 
 .PHONY: wipe 
 wipe:
-	@rm -f processed-* test.txt-* output.txt 
+	@rm -f processed-* tmp-* *.txt-* output.txt 
 	@echo 'Got rid of non-input text files.'
 
 .PHONY: cleanish
