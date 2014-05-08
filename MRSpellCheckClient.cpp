@@ -122,7 +122,6 @@ int main (int argc, char* argv[])
 	
     }
 
-    in.close();
     sleep(2);
     for (uint64_t k = 0; k < j; ++k)
     {
@@ -143,7 +142,6 @@ int main (int argc, char* argv[])
 		    std::stringstream message;
 		    message << ACCEPT_CHUNK << messages[k];
 		
-		    in.open(filename.c_str());
 		    in.seekg(positions[k]);
 		    std::stringstream chunk;
 		    int chunk_lines = 0;
@@ -183,7 +181,6 @@ int main (int argc, char* argv[])
 		std::stringstream message;
 		message << ACCEPT_CHUNK << messages[k];
 		
-		in.open(filename.c_str());
 		in.seekg(positions[k]);
 		std::stringstream chunk;
 		int chunk_lines = 0;
@@ -213,7 +210,6 @@ int main (int argc, char* argv[])
         message.clear();
         message << RETURN_CHUNK_RESULT << messages[l];
 		
-	in.open(filename.c_str());
 	in.seekg(positions[l]);
 	std::stringstream chunk;
 	int chunk_lines = 0;
@@ -269,7 +265,6 @@ int main (int argc, char* argv[])
 		    std::stringstream message;
 		    message << RETURN_CHUNK_RESULT << "\n" << messages[l];
 		    
-		    in.open(filename.c_str());
 		    in.seekg(positions[l]);
 		    std::stringstream chunk;
 		    int chunk_lines = 0;
@@ -314,7 +309,6 @@ int main (int argc, char* argv[])
 		    std::stringstream message;
 		    message << ACCEPT_CHUNK << "\n" << messages[l];
 		    
-		    in.open(filename.c_str());
 		    in.seekg(positions[l]);
 		    std::stringstream chunk;
 		    int chunk_lines = 0;
@@ -337,6 +331,7 @@ int main (int argc, char* argv[])
 //-----------------------------------------------------------
 	}
     }
+    in.close();
     _utility::log.o << "Success!" << std::endl;
     _utility::log.flush();
 }
