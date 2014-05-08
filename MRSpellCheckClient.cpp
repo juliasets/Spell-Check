@@ -120,85 +120,50 @@ int main (int argc, char* argv[])
 	    jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
         }
 	
-    }
-
-    sleep(2);
-    for (uint64_t k = 0; k < j; ++k)
-    {
+        //check for received status
         std::string result;
-
-	if (jobs[k]->get_result(100000, result))
+	if (jobs[j]->get_result(100000, result))
 	{
 	    if(!result.compare(ERROR_MESSAGE))
 	    {
 		bool send_success = false;
 		while (!(result.compare(ERROR_MESSAGE)) || !send_success)
 		{
-		    _utility::log.o << "ClientJob (" << jobs[k]->port() << ") failed: message not received by slave.";
+		    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") failed: message not received by slave.";
 		    _utility::log.flush();          
 		    
 		    // resend message
+		    jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *jobs[j])));
+		    jobs[j]->send_job(request_message.str());
 
-		    std::stringstream message;
-		    message << ACCEPT_CHUNK << messages[k];
-		
-		    in.seekg(positions[k]);
-		    std::stringstream chunk;
-		    int chunk_lines = 0;
-		    for (int i = 0; i < max_lines && !in.eof(); ++i)
-		    {
-			std::string line;
-			getline(in, line);
-			chunk << line << "\n";
-			chunk_lines = i+1;
-		    }
-		    message << chunk_lines << "\n";
-		    message << chunk.str() << "\n";
-
-		    
-		    jobs[k] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
-		    jobs[k]->send_job(message.str());
-
-		    send_success = jobs[k]->get_result(100000, result);
-		    sleep(1);
+		    send_success = jobs[j]->get_result(100000, result);
 		}
+		_utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
+		_utility::log.flush();          
 		
 	    }	
 	    else if (!result.compare(RECEIVED_MESSAGE))
 	    {
-		_utility::log.o << "ClientJob (" << jobs[k]->port() << ") received." << std::endl;
+		_utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
 		_utility::log.flush();          
 	    }
 	}
 	else
 	{
-	    _utility::log.o << "ClientJob (" << jobs[k]->port() << ") failed: get timed out." << std::endl;
+	    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") failed: slave response not received." << std::endl;
 	    _utility::log.flush();      
 
 	    bool send_success = false;
-	    while (!send_success)
+	    while (!(result.compare(ERROR_MESSAGE)) || !send_success)
 	    {
-		std::stringstream message;
-		message << ACCEPT_CHUNK << messages[k];
-		
-		in.seekg(positions[k]);
-		std::stringstream chunk;
-		int chunk_lines = 0;
-		for (int i = 0; i < max_lines && !in.eof(); ++i)
-		{
-		    std::string line;
-		    getline(in, line);
-		    chunk << line << "\n";
-		    chunk_lines = i+1;
-		}
-		message << chunk_lines << "\n";
-		message << chunk.str() << "\n";
-		
-		jobs[k] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
-		jobs[k]->send_job(message.str());
+		jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+		jobs[j]->send_job(request_message.str());
 
-		send_success = jobs[k]->get_result(100000, result);
+		send_success = jobs[j]->get_result(100000, result);
 	    }
+	    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
+	    _utility::log.flush();          
+		
 	}
     }
 
