@@ -56,7 +56,7 @@ int main (int argc, char* argv[])
         std::exit(EXIT_FAILURE);
     }
     
-    ThreadPool tpool (4);
+    ThreadPool tpool (1);
 
     _utility::log.o << "Slave: ThreadPool created." << std::endl;
     _utility::log.flush();
@@ -121,7 +121,7 @@ int main (int argc, char* argv[])
             {
                 output = correct(input, corr, first, db, &tpool);
                 std::stringstream ss2 (output);
-		std::cout << output;
+		std::cout << output << " ";
                 while (ss2 >> first);
             }
 	    std::cout << std::endl;
