@@ -12,7 +12,7 @@ SCU := https://github.com/elizabethkilson/SpellCorrector.git
 LIBS := -L$(LB) -ldistributed -lboost_system -pthread -lsqlite3
 
 .PHONY: default
-default:  $(LB)/libdistributed.a $(SC)/spellcorrector.exe master-test client slave
+default:  $(LB)/libdistributed.a $(SC)/spellcorrector.exe master-test client slave pipe
 
 $(LB)/libdistributed.a:
 # 	Ensure that the directory contains what it should
@@ -87,6 +87,12 @@ MRSpellCheckSlave.o: MRSpellCheckSlave.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 .PHONY: killtest
 killtest: 
 	pkill MRSpellCheckSla & pkill MRSpellCheckCli & pkill master-test &
+
+pipe: PipeSpellCheck.o
+	$(LD) -o PipeSpellCheck PipeSpellCheck.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
+
+PipeSpellCheck.o: PipeSpellCheck.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
+	$(CC) PipeSpellCheck.cpp
 
 .PHONY: update
 update:
