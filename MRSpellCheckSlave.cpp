@@ -98,7 +98,8 @@ void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
         filenames->pop_front();
         queueLock->unlock();
         
-        std::cout<<"Slave working on: "<<origFilename<<std::endl;
+        _utility::log.o << "Slave working on: " <<origFilename << std::endl;
+        _utility::log.flush();
         
         std::string workingFilename = "tmp-" + origFilename;
         std::string finishedFilename = "processed-" + origFilename;
@@ -124,7 +125,6 @@ void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
                 output = correct(input, corr, first, db, &tpool);
                 std::stringstream ss2 (output);
                 out << output << " ";
-                std::cout<<"Corrected "<<input<<" to "<<output<<std::endl;
                 while (ss2 >> first);
             }
             out << std::endl;
@@ -151,7 +151,9 @@ bool accept_chunk(std::stringstream * message, std::string key)
 	
 	if (count == noLines + 2)
 		return true;
-	std::cout<<"Mismatched line numbers: "<<count<<" "<<noLines<<std::endl;
+	_utility::log.o << "Slave error: Mismatched line numbers: " << count 
+	    << " " << noLines << std::endl;
+    _utility::log.flush();
 	return false;
 }
 
@@ -176,7 +178,17 @@ int main (int argc, char* argv[])
     std::list<std::string> filenames;
     std::mutex queueLock;
     
-    std::thread processor (performJobs, &filenames, &queueLock);
+    unsigned int numThreads = std::thread::hardware_concurrency();
+    
+    if (numThreads == 0)
+        numThreads = 1;
+    
+    std::vector<std::thread> processors (numThreads);
+    
+    for (int i = 0; i < numThreads; ++i)
+    {
+        processors[i] = std::thread (performJobs, &filenames, &queueLock);
+    }
     
     for (;;)
     {
@@ -209,9 +221,13 @@ int main (int argc, char* argv[])
 		            if (resultFile.is_open()) {
 		                resultFile.seekg (0, resultFile.end);
                         int length = resultFile.tellg();
+                        if (length == 0)
+                        {
+                            std::string blank = "";
+                            job.send_result(blank);
+                            break;
+                        }
                         resultFile.seekg (0, resultFile.beg);
-                        std::cout<<"File name: "<<"processed-"<<key<<std::endl;
-                        std::cout<<"File size: "<<length<<std::endl;
                         
                         char * buffer = new char [length];
                         resultFile.read (buffer,length);
@@ -220,7 +236,9 @@ int main (int argc, char* argv[])
                         
                         std::string result (buffer);
                         
-                        std::cout<<"Slave returning result: "<<result<<std::endl;
+                        _utility::log.o << "Slave returning result for:" 
+                            << key << std::endl;
+                        _utility::log.flush();
                         
                         job.send_result(result);
                         break;
