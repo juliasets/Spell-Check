@@ -47,9 +47,9 @@ int main (int argc, char* argv[])
     in.open( filename.c_str() );
     if (!in.is_open())
     {
-	_utility::log.o << "Failed to open " << filename << std::endl;
-	_utility::log.flush();
-	exit(1);
+        _utility::log.o << "Failed to open " << filename << std::endl;
+        _utility::log.flush();
+        exit(1);
     }
     _utility::log.o << "Client: " << filename << std::endl;
     _utility::log.flush();
@@ -67,16 +67,16 @@ int main (int argc, char* argv[])
     for (j = 0; !end; ++j)
     {
         // Format: job type, key, # of lines, chunk
-	std::stringstream message;
-	std::stringstream request_message;
+        std::stringstream message;
+        std::stringstream request_message;
 
-	request_message << ACCEPT_CHUNK << "\n";
-	message << filename << "-" << rand_key << time(NULL) << j << "\n";
+        request_message << ACCEPT_CHUNK << "\n";
+        message << filename << "-" << rand_key << time(NULL) << j << "\n";
         messages.push_back(message.str());
-	int chunk_lines = 0;
-	
-	positions.push_back(in.tellg());
-	std::stringstream chunk;
+        int chunk_lines = 0;
+        
+        positions.push_back(in.tellg());
+        std::stringstream chunk;
         chunk.clear();
         for (int i = 0; i < max_lines && !in.eof(); ++i)
         {
@@ -87,7 +87,7 @@ int main (int argc, char* argv[])
             chunk_lines = i+1;
         }
         request_message << message.str();
-	request_message << chunk_lines << "\n";
+        request_message << chunk_lines << "\n";
         request_message << chunk.str() << "\n";
 
         end = chunk_lines != max_lines;
@@ -102,81 +102,81 @@ int main (int argc, char* argv[])
         _utility::log.o << "ClientJob: " << jobs[j]->port() << std::endl;
         _utility::log.flush();
         
-	while (!jobs[j]->send_job(request_message.str()))
+        while (!jobs[j]->send_job(request_message.str()))
         {
             _utility::log.o << "Couldn't send job to slave." << std::endl;
             _utility::log.flush();
 
-	    jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+            jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
         }
-	
+        
         //check for received status
         std::string result;
-	if (jobs[j]->get_result(100000, result))
-	{
-	    if(!result.compare(ERROR_MESSAGE))
-	    {
-		bool send_success = false;
-		while (!(result.compare(ERROR_MESSAGE)) || !send_success)
-		{
-		    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") failed: message not received by slave.";
-		    _utility::log.flush();          
-		    
-		    // resend message
-		    jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *jobs[j])));
-		    jobs[j]->send_job(request_message.str());
+        if (jobs[j]->get_result(100000, result))
+        {
+            if(!result.compare(ERROR_MESSAGE))
+            {
+                bool send_success = false;
+                while (!(result.compare(ERROR_MESSAGE)) || !send_success)
+                {
+                    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") failed: message not received by slave.";
+                    _utility::log.flush();          
+                    
+                    // resend message
+                    jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *jobs[j])));
+                    jobs[j]->send_job(request_message.str());
 
-		    send_success = jobs[j]->get_result(100000, result);
-		}
-		_utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
-		_utility::log.flush();          
-		
-	    }	
-	    else if (!result.compare(RECEIVED_MESSAGE))
-	    {
-		_utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
-		_utility::log.flush();          
-	    }
-	}
-	else
-	{
-	    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") failed: slave response not received." << std::endl;
-	    _utility::log.flush();      
+                    send_success = jobs[j]->get_result(100000, result);
+                }
+                _utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
+                _utility::log.flush();          
+                
+            }   
+            else if (!result.compare(RECEIVED_MESSAGE))
+            {
+                _utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
+                _utility::log.flush();          
+            }
+        }
+        else
+        {
+            _utility::log.o << "ClientJob (" << jobs[j]->port() << ") failed: slave response not received." << std::endl;
+            _utility::log.flush();      
 
-	    bool send_success = false;
-	    while (!(result.compare(ERROR_MESSAGE)) || !send_success)
-	    {
-		jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
-		jobs[j]->send_job(request_message.str());
+            bool send_success = false;
+            while (!(result.compare(ERROR_MESSAGE)) || !send_success)
+            {
+                jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+                jobs[j]->send_job(request_message.str());
 
-		send_success = jobs[j]->get_result(100000, result);
-	    }
-	    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
-	    _utility::log.flush();          
-		
-	}
+                send_success = jobs[j]->get_result(100000, result);
+            }
+            _utility::log.o << "ClientJob (" << jobs[j]->port() << ") received." << std::endl;
+            _utility::log.flush();          
+                
+        }
     }
 
     sleep(2);
 
     for (uint64_t l = 0; l < j; ++l)
     {
-	std::stringstream message;
+        std::stringstream message;
         message.clear();
         message << RETURN_CHUNK_RESULT << messages[l];
-		
-	in.seekg(positions[l]);
-	std::stringstream chunk;
-	int chunk_lines = 0;
-	for (int i = 0; i < max_lines && !in.eof(); ++i)
-	{
-	    std::string line;
-	    getline(in, line);
-	    chunk << line << "\n";
-	    chunk_lines = i+1;
-	}
-	message << chunk_lines << "\n";
-	message << chunk.str() << "\n";
+                
+        in.seekg(positions[l]);
+        std::stringstream chunk;
+        int chunk_lines = 0;
+        for (int i = 0; i < max_lines && !in.eof(); ++i)
+        {
+            std::string line;
+            getline(in, line);
+            chunk << line << "\n";
+            chunk_lines = i+1;
+        }
+        message << chunk_lines << "\n";
+        message << chunk.str() << "\n";
 
 
         result_jobs.emplace_back(new ClientJob(client, *jobs[l]));
@@ -192,100 +192,100 @@ int main (int argc, char* argv[])
         {
             _utility::log.o << "Couldn't receive job to slave." << std::endl;
             _utility::log.flush();
-	    
-	    jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+            
+            jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
         }
     }
     std::string outfilename = "output.txt";
     std::ofstream out( outfilename.c_str(), std::ios_base::out);
-//    for (auto & job : result_jobs)
+    //    for (auto & job : result_jobs)
     for (int l = 0; l < j; ++l)
     {
 
-	bool receive_success = false;
-	while (!receive_success)
-	{
-	    std::string result;
-	    if (result_jobs[l]->get_result(100000, result))
-	    {
-		if(!result.compare(WAITING_MESSAGE))
-		{
-		
-		    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") needs more time." << std::endl;
-		    _utility::log.flush();
-		
-		    // Resend request for results
-		    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *result_jobs[l])));
-		
-		    std::stringstream message;
-		    message << RETURN_CHUNK_RESULT << "\n" << messages[l];
-		    
-		    in.seekg(positions[l]);
-		    std::stringstream chunk;
-		    int chunk_lines = 0;
-		    for (int i = 0; i < max_lines && !in.eof(); ++i)
-		    {
-			std::string line;
-			getline(in, line);
-			chunk << line << "\n";
-			chunk_lines = i+1;
-		    }
-		    message << chunk_lines << "\n";
-		    message << chunk.str() << "\n";
+        bool receive_success = false;
+        while (!receive_success)
+        {
+            std::string result;
+            if (result_jobs[l]->get_result(100000, result))
+            {
+                if(!result.compare(WAITING_MESSAGE))
+                {
+                
+                    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") needs more time." << std::endl;
+                    _utility::log.flush();
+                
+                    // Resend request for results
+                    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *result_jobs[l])));
+                
+                    std::stringstream message;
+                    message << RETURN_CHUNK_RESULT << "\n" << messages[l];
+                    
+                    in.seekg(positions[l]);
+                    std::stringstream chunk;
+                    int chunk_lines = 0;
+                    for (int i = 0; i < max_lines && !in.eof(); ++i)
+                    {
+                        std::string line;
+                        getline(in, line);
+                        chunk << line << "\n";
+                        chunk_lines = i+1;
+                    }
+                    message << chunk_lines << "\n";
+                    message << chunk.str() << "\n";
+                    
+                    //-----------------------------------------------------------
+                    //need to check that this goes through etc.
+                    result_jobs[l] ->send_job(message.str());
+                    //-----------------------------------------------------------
+                
+                    sleep(5);
+                }
+                else
+                {
+                    out << result;
+                    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << 
+                        ") received result." << std::endl;
+                    _utility::log.flush();
+                    receive_success = true;
+                }
+            }
+            else
+            {
+                //-----------------------------------------------------------
+                //this actually does not work as desired yet, would involve a major loop over most of this file
+                _utility::log.o << "A job has closed unexpectedly. Please stop and start over." << std::endl;
+                _utility::log.flush();
+                _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") failed, attempting to resend." << std::endl;
+                _utility::log.flush();
 
-//-----------------------------------------------------------
-//need to check that this goes through etc.
-		    result_jobs[l] ->send_job(message.str());
-//-----------------------------------------------------------
-		
-		    sleep(5);
-		}
-		else
-		{
-		    out << result;
-		    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << 
-		        ") received result." << std::endl;
-		    _utility::log.flush();
-		    receive_success = true;
-		}
-	    }
-	    else
-	    {
-//-----------------------------------------------------------
-//this actually does not work as desired yet, would involve a major loop over most of this file
-		_utility::log.o << "A job has closed unexpectedly. Please stop and start over." << std::endl;
-		_utility::log.flush();
-		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") failed, attempting to resend." << std::endl;
-		_utility::log.flush();
-
-		// Resend job
-		bool send_success = false;
-		while (!send_success)
-		{
-		    std::stringstream message;
-		    message << ACCEPT_CHUNK << "\n" << messages[l];
-		    
-		    in.seekg(positions[l]);
-		    std::stringstream chunk;
-		    int chunk_lines = 0;
-		    for (int i = 0; i < max_lines && !in.eof(); ++i)
-		    {
-			std::string line;
-			getline(in, line);
-			chunk << line << "\n";
-			chunk_lines = i+1;
-		    }
-		    message << chunk_lines << "\n";
-		    message << chunk.str() << "\n";
-		    
-		    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
-		    result_jobs[l]->send_job(message.str());
-		    
-		    send_success = result_jobs[l]->get_result(100000, result);
-		}
-	    }
-//-----------------------------------------------------------
-	}
+                // Resend job
+                bool send_success = false;
+                while (!send_success)
+                {
+                    std::stringstream message;
+                    message << ACCEPT_CHUNK << "\n" << messages[l];
+                    
+                    in.seekg(positions[l]);
+                    std::stringstream chunk;
+                    int chunk_lines = 0;
+                    for (int i = 0; i < max_lines && !in.eof(); ++i)
+                    {
+                        std::string line;
+                        getline(in, line);
+                        chunk << line << "\n";
+                        chunk_lines = i+1;
+                    }
+                    message << chunk_lines << "\n";
+                    message << chunk.str() << "\n";
+                    
+                    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+                    result_jobs[l]->send_job(message.str());
+                    
+                    send_success = result_jobs[l]->get_result(100000, result);
+                }
+            }
+            //-----------------------------------------------------------
+        }
     }
     in.close();
     _utility::log.o << "Success!" << std::endl;
