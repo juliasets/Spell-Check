@@ -114,7 +114,7 @@ int main (int argc, char* argv[])
         
 	while (!jobs[j]->send_job(request_message.str()))
         {
-            _utility::log.o << "Couldn't send job to slave." << std::endl;
+            _utility::log.o << "Couldn't send job to slave. Trying new slave..." << std::endl;
             _utility::log.flush();
 
 	    jobs[j] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
@@ -239,10 +239,15 @@ int main (int argc, char* argv[])
         _utility::log.flush();
         while (!result_jobs[l]->send_job(message.str()))
         {
-            _utility::log.o << "Couldn't receive job to slave." << std::endl;
+            _utility::log.o << "Couldn't send receive job to slave. Trying new slave..." << std::endl;
             _utility::log.flush();
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+	    _utility::log.o << "Actually, this is really bad because we probably lost the client and need to resubmit the original job." << std::endl;
+	    _utility::log.flush();
+//-----------------------------------------------------------
 	    
-	    jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+	    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
         }
     }
     std::string outfilename = "output.txt";
@@ -283,10 +288,26 @@ int main (int argc, char* argv[])
 		    message << chunk_lines << "\n";
 		    message << chunk.str() << "\n";
 
+		    if (!*result_jobs[l])
+		    {
+			_utility::log.o << "Couldn't reconnect to slave." << std::endl;
+			_utility::log.flush();
+			return 1;
+		    }
+		    _utility::log.o << "ClientJob: " << result_jobs[l]->port() << std::endl;
+		    _utility::log.flush();
+		    while (!result_jobs[l]->send_job(message.str()))
+		    {
+			_utility::log.o << "Couldn't resend receive job to slave. Trying new slave..." << std::endl;
+			_utility::log.flush();
 //-----------------------------------------------------------
-//need to check that this goes through etc.
-		    result_jobs[l] ->send_job(message.str());
 //-----------------------------------------------------------
+			_utility::log.o << "Actually, this is really bad because we probably lost the client and need to resubmit the original job." << std::endl;
+			_utility::log.flush();
+//-----------------------------------------------------------
+	    
+			result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+		    }
 		
 		    sleep(5);
 		}
@@ -308,12 +329,38 @@ int main (int argc, char* argv[])
 		_utility::log.flush();
 
 		// Resend job
-		bool send_success = false;
-		while (!send_success)
+		bool receive_success = false;
+		while (!receive_success)
 		{
-		    std::stringstream message;
-		    message << ACCEPT_CHUNK << "\n" << messages[l];
+		    bool send_success = false;
+		    while (!(result.compare(ERROR_MESSAGE)) || !send_success)
+		    {
+			std::stringstream message;
+			message << ACCEPT_CHUNK << "\n" << messages[l];
 		    
+			in.open(filename.c_str());
+			in.seekg(positions[l]);
+			std::stringstream chunk;
+			int chunk_lines = 0;
+			for (int i = 0; i < max_lines && !in.eof(); ++i)
+			{
+			    std::string line;
+			    getline(in, line);
+			    chunk << line << "\n";
+			    chunk_lines = i+1;
+			}
+			message << chunk_lines << "\n";
+			message << chunk.str() << "\n";
+		    
+			result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+			result_jobs[l]->send_job(message.str());
+		    
+			send_success = result_jobs[l]->get_result(100000, result);
+		    }
+		    std::stringstream message;
+		    message.clear();
+		    message << RETURN_CHUNK_RESULT << messages[l];
+		
 		    in.open(filename.c_str());
 		    in.seekg(positions[l]);
 		    std::stringstream chunk;
@@ -327,11 +374,29 @@ int main (int argc, char* argv[])
 		    }
 		    message << chunk_lines << "\n";
 		    message << chunk.str() << "\n";
-		    
-		    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
-		    result_jobs[l]->send_job(message.str());
-		    
-		    send_success = result_jobs[l]->get_result(100000, result);
+
+
+		    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *jobs[l])));
+		    if (!*result_jobs[l])
+		    {
+			_utility::log.o << "Couldn't get slave from master." << std::endl;
+			_utility::log.flush();
+			return 1;
+		    }
+		    _utility::log.o << "ClientJob: " << result_jobs[l]->port() << std::endl;
+		    _utility::log.flush();
+		    while (!result_jobs[l]->send_job(message.str()))
+		    {
+			_utility::log.o << "Couldn't send receive job to slave. Trying new slave..." << std::endl;
+			_utility::log.flush();
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+			_utility::log.o << "Actually, this is really bad because we probably lost the client and need to resubmit the original job." << std::endl;
+			_utility::log.flush();
+//-----------------------------------------------------------
+	    
+			result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+		    }
 		}
 	    }
 //-----------------------------------------------------------
