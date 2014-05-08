@@ -78,27 +78,17 @@ int main (int argc, char* argv[])
 	positions.push_back(in.tellg());
 	std::stringstream chunk;
         chunk.clear();
-	_utility::log.o << "Chunk " << j << ":" << std::endl;
-        _utility::log.flush();
         for (int i = 0; i < max_lines && !in.eof(); ++i)
         {
             std::string line;
             getline(in, line);
-	    //*
-	    _utility::log.o << line << std::endl;
-	    _utility::log.flush();
-	    //*/
+            
             chunk << line << "\n";
             chunk_lines = i+1;
         }
         request_message << message.str();
 	request_message << chunk_lines << "\n";
         request_message << chunk.str() << "\n";
-
-        _utility::log.o << "Message:" << std::endl;
-        _utility::log.flush();
-        _utility::log.o << request_message.str() << std::endl;
-        _utility::log.flush();
 
         end = chunk_lines != max_lines;
 
@@ -253,7 +243,8 @@ int main (int argc, char* argv[])
 		else
 		{
 		    out << result;
-		    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result: " << result << std::endl;
+		    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << 
+		        ") received result." << std::endl;
 		    _utility::log.flush();
 		    receive_success = true;
 		}

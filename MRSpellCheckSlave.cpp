@@ -28,26 +28,28 @@ std::string format_word(std::string word, bool * end)
     std::list<std::string> words;
     for (int i = 0; i < word.length(); i++)
     {
-	int begin = i;
-	while (ispunct(word[begin]))
-	    ++begin;
-	if (begin >= word.length())
-	    break;
-	i = begin + 1;
-	while ((!ispunct(word[i])) && (i < word.length()))
-	    ++i;
-	std::string tmpword = word.substr(begin, i - begin);
-	words.push_back(tmpword);
-	if (i < word.length())
-	    (*end) = true;
+	    int begin = i;
+	    while (ispunct(word[begin]))
+	        ++begin;
+	    if (begin >= word.length())
+	        break;
+	    i = begin + 1;
+	    while ((!ispunct(word[i])) && (i < word.length()))
+	        ++i;
+	    std::string tmpword = word.substr(begin, i - begin);
+	    words.push_back(tmpword);
+	    if (i < word.length())
+	        (*end) = true;
     }
+    if (words.empty())
+        return "";
     std::stringstream result;
     result << words.front();
     words.pop_front();
     while (!words.empty())
     {
-	result << " " << words.front();
-	words.pop_front();
+	    result << " " << words.front();
+	    words.pop_front();
     }
     return result.str();
 }
@@ -116,13 +118,12 @@ void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
             {
 	            phrase += " " + format_word(word, &end);
             }
-            
             ss.clear();
             ss.str(phrase);
-            
             while (ss >> input)
             {
                 output = correct(input, corr, first, db, &tpool);
+                
                 std::stringstream ss2 (output);
                 out << output << " ";
                 while (ss2 >> first);
@@ -131,6 +132,9 @@ void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
         }
         
         rename( workingFilename.c_str(), finishedFilename.c_str());
+        
+        in.close();
+        out.close();
     }
 }
 
@@ -148,6 +152,8 @@ bool accept_chunk(std::stringstream * message, std::string key)
 		file << line << std::endl;
 		count++;
 	}
+	
+	file.close();
 	
 	if (count == noLines + 2)
 		return true;
@@ -243,6 +249,7 @@ int main (int argc, char* argv[])
                         job.send_result(result);
                         break;
 		            }
+		            resultFile.close();
 		            job.send_result(WAITING_MESSAGE);
 			        break;
 	        }
