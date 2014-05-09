@@ -14,6 +14,7 @@
 #include <fstream>
 #include <list>
 #include <time.h>
+#include <math.h>
 
 using namespace Distributed;
 
@@ -57,7 +58,20 @@ int main (int argc, char* argv[])
     std::string phrase;
     std::string word;
     bool end = false;
-    int max_lines = 5;
+    
+    in.seekg (0, in.end);
+    int length = in.tellg();
+    if (length == 0)
+    {
+        _utility::log.o << filename << " is empty." << std::endl;
+        _utility::log.flush();
+        exit(1);
+    }
+    in.seekg (0, in.beg);
+    
+    int max_lines = ceil(((double)length)/3000);
+    _utility::log.o << "Client maxlines: " << max_lines << std::endl;
+    _utility::log.flush();
     uint64_t rand_key = _utility::rand64();
     uint64_t j;
 
@@ -185,7 +199,7 @@ int main (int argc, char* argv[])
 	message << chunk_lines << "\n";
 	message << chunk.str() << "\n";
 
-	request_message << message;
+	request_message << message.str();
 
         result_jobs.emplace_back(new ClientJob(client, *jobs[l]));
         if (!*result_jobs[l])
@@ -219,20 +233,20 @@ int main (int argc, char* argv[])
 		    sleep(10);          
 		    
 		    // resend message
-		    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *result_jobs[l])));
+		    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *jobs[l])));
 		    result_jobs[l]->send_job(request_message.str());
 
 		    send_success = result_jobs[l]->get_result(100000, result);
 		}
 		out << result;
-		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received." << std::endl;
+		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received: " << result << std::endl;
 		_utility::log.flush();          
 		
 	    }	
 	    else
 	    {
 		out << result;
-		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received." << std::endl;
+		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received: " << result << std::endl;
 		_utility::log.flush();          
 	    }
 	}
@@ -247,7 +261,7 @@ int main (int argc, char* argv[])
 	    while (!(result.compare(WAITING_MESSAGE)) || !receive_success)
 	    {
 		std::stringstream new_request_message;
-		new_request_message << "ACCEPT_CHUNK" << "\n" << message;
+		new_request_message << "ACCEPT_CHUNK" << "\n" << message.str();
 		bool send_success = false;
 		while (!(result.compare(ERROR_MESSAGE)) || !send_success)
 		{
