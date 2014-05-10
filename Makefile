@@ -90,7 +90,7 @@ killtest:
 	pkill MRSpellCheckSla & pkill MRSpellCheckCli & pkill master-test &
 
 pipe: PipeSpellCheck.o
-	$(LD) -o PipeSpellCheck PipeSpellCheck.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
+	$(LD) -o $(EF)/PipeSpellCheck PipeSpellCheck.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
 
 PipeSpellCheck.o: PipeSpellCheck.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
 	$(CC) PipeSpellCheck.cpp
