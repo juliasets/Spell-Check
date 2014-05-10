@@ -238,14 +238,20 @@ int main (int argc, char* argv[])
 
 		    send_success = result_jobs[l]->get_result(100000, result);
 		}
-		out << result;
+		if (result != EMPTY_MESSAGE)
+		{
+		    out << result;
+		}
 		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received: " << result << std::endl;
 		_utility::log.flush();          
 		
 	    }	
 	    else
 	    {
-		out << result;
+	    if (result != EMPTY_MESSAGE)
+		{
+		    out << result;
+		}
 		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received: " << result << std::endl;
 		_utility::log.flush();          
 	    }
@@ -275,7 +281,10 @@ int main (int argc, char* argv[])
 
 		receive_success = result_jobs[l]->get_result(100000, result);
 	    }
-	    out << result;
+	    if (result != EMPTY_MESSAGE)
+		{
+	        out << result;
+        }
 	    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received." << std::endl;
 	    _utility::log.flush();          
 		

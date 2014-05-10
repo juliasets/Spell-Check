@@ -3,3 +3,4 @@
 #define ERROR_MESSAGE "Job failed."
 #define RECEIVED_MESSAGE "Received chunk."
 #define WAITING_MESSAGE "Not done yet."
+#define EMPTY_MESSAGE "Empty message."

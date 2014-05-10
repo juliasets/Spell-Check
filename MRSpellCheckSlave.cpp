@@ -223,38 +223,37 @@ int main (int argc, char* argv[])
 			        break;
 			        
 		        case RETURN_CHUNK_RESULT:
-		            _utility::log.o << "Slave RETURN_CHUNK" << "processed-" << key << std::endl;
-                    _utility::log.flush();
 		            std::ifstream resultFile ( ("processed-" + key).c_str() );
 		            if (resultFile.is_open()) {
 		                resultFile.seekg (0, resultFile.end);
                         int length = resultFile.tellg();
                         if (length == 0)
                         {
-                            std::string blank = " ";
-                            job.send_result(blank);
+                            //std::string blank = " ";
+                            job.send_result(EMPTY_MESSAGE);
                             break;
                         }
                         resultFile.seekg (0, resultFile.beg);
                         
-                        char * buffer = new char [length];
+                        char * buffer = new char [length + 1];
                         resultFile.read (buffer,length);
+                        
+                        buffer[length] = '\0';
 
                         resultFile.close();
                         
                         std::string result (buffer);
                         
-                        _utility::log.o << "Slave returning result for:" 
+                        _utility::log.o << "Slave returning result for: " 
                             << key << std::endl;
                         _utility::log.flush();
                         
-                        _utility::log.o << "Slave finished" << std::endl;
-                        _utility::log.flush();
                         job.send_result(result);
                         break;
 		            }
 		            resultFile.close();
-		            _utility::log.o << "Slave wait" << std::endl;
+		            _utility::log.o << "Slave needs more time for: "
+		                << key << std::endl;
                     _utility::log.flush();
 		            job.send_result(WAITING_MESSAGE);
 			        break;
