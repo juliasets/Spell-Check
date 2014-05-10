@@ -133,7 +133,7 @@ int main (int argc, char* argv[])
                 bool send_success = false;
                 while (!(result.compare(ERROR_MESSAGE)) || !send_success)
                 {
-                    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") failed: message not received by slave.";
+                    _utility::log.o << "ClientJob (" << jobs[j]->port() << ") failed: message not received by slave.\n";
                     _utility::log.flush();          
                     
                     // resend message
@@ -227,7 +227,7 @@ int main (int argc, char* argv[])
 		bool send_success = false;
 		while (!(result.compare(WAITING_MESSAGE)) || !send_success)
 		{
-		    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") busy: slave needs more time.";
+		    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") busy: slave needs more time.\n";
 		    _utility::log.flush();          
 		    
 		    sleep(10);          

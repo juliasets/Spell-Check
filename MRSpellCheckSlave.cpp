@@ -103,12 +103,15 @@ void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
         _utility::log.o << "Slave working on: " <<origFilename << std::endl;
         _utility::log.flush();
         
-        std::string workingFilename = "tmp-" + origFilename;
-        std::string finishedFilename = "processed-" + origFilename;
+        std::string workingFilename = "/tmp/tmp-" + origFilename;
+        std::string finishedFilename = "/tmp/processed-" + origFilename;
         
-        std::ifstream in( origFilename.c_str() );
+        std::ifstream in( ("/tmp/" + origFilename).c_str() );
         
         std::ofstream out( workingFilename.c_str() );
+        
+        std::stringstream buffer;
+        int count = 0;
         
         while (in>>word)
         {
@@ -125,16 +128,40 @@ void performJobs(std::list<std::string> * filenames, std::mutex * queueLock)
                 output = correct(input, corr, first, db, &tpool);
                 
                 std::stringstream ss2 (output);
-                out << output << " ";
+                buffer << output << " ";
                 while (ss2 >> first);
             }
-            out << std::endl;
+            buffer << std::endl;
+            //_utility::log.o << "Slave working on: " <<origFilename << std::endl;
+            //_utility::log.flush();
+            count ++;
+            if (count >= 100)
+            {
+                out << buffer.str();
+                buffer.clear();
+                count = 0;
+            }
         }
+        out << buffer.str();
         
-        rename( workingFilename.c_str(), finishedFilename.c_str());
+        int failed = rename( workingFilename.c_str(), finishedFilename.c_str());
+        
+        if (failed)
+        {
+            _utility::log.o << "Slave unable to move file: " << finishedFilename << std::endl;
+            _utility::log.flush();
+        }
         
         in.close();
         out.close();
+        
+        /*std::ifstream  src(workingFilename.c_str());
+        std::ofstream  dst(finishedFilename.c_str());
+
+        dst << src.rdbuf();
+        
+        src.close();
+        dst.close();*/
     }
 }
 
@@ -144,7 +171,7 @@ bool accept_chunk(std::stringstream * message, std::string key)
 	(*message) >> noLines;
 	int count = 0;
 	
-	std::ofstream file ( key.c_str() );
+	std::ofstream file ( ("/tmp/" + key).c_str() );
 	std::string line;
 	
 	while (std::getline((*message), line))
@@ -223,7 +250,7 @@ int main (int argc, char* argv[])
 			        break;
 			        
 		        case RETURN_CHUNK_RESULT:
-		            std::ifstream resultFile ( ("processed-" + key).c_str() );
+		            std::ifstream resultFile ( ("/tmp/processed-" + key).c_str() );
 		            if (resultFile.is_open()) {
 		                resultFile.seekg (0, resultFile.end);
                         int length = resultFile.tellg();

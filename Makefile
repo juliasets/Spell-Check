@@ -67,7 +67,7 @@ $(SC)/spellcorrector.exe:
 
 .PHONY: test
 test: master-test slave client
-	./$(EF)/master-test & ./$(EF)/MRSpellCheckClient 127.0.0.1 30000 test.txt & ./$(EF)/MRSpellCheckSlave 127.0.0.1 30000 &
+	./$(EF)/master-test & ./$(EF)/MRSpellCheckClient 127.0.0.1 30000 tessWarAndPeace.txt & ./$(EF)/MRSpellCheckSlave 127.0.0.1 30000 &
 
 master-test: Master-test.cpp $(LB)/Master.o $(LB)/Master.hpp
 	$(CC) Master-test.cpp
