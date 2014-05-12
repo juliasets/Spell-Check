@@ -3,14 +3,15 @@ SHELL := /bin/bash
 G  := g++
 
 CC  := $(G) --std=c++11 -Wall -Wextra --pedantic -c
-LD  := $(G) --std=c++11 -Wall -Wextra --pedantic -lboost_system -pthread
+LD  := $(G) --std=c++11 -Wall -Wextra --pedantic -ldl -static -lboost_system -pthread
 LB  := ../libdistributed
 SC  := ../SpellCorrector
 EF  := ../execs
 GC  := git clone -q
 LBU := https://github.com/juliasets/libdistributed.git
 SCU := https://github.com/elizabethkilson/SpellCorrector.git
-LIBS := -L$(LB) -ldistributed -lboost_system -pthread -lsqlite3
+LIBSNOLD := -static -lboost_system -pthread -lsqlite3 -ldl
+LIBS := -L$(LB) -ldistributed $(LIBSNOLD)
 
 .PHONY: default
 default:  $(LB)/libdistributed.a $(SC)/spellcorrector.exe master-test client slave pipe
@@ -38,7 +39,7 @@ $(LB)/libdistributed.a:
 		echo ''; \
 	fi
 #	Actually run make
-	@cd $(LB) && $(MAKE) libdistributed.a
+#	@cd $(LB) && $(MAKE) libdistributed.a
 
 $(SC)/spellcorrector.exe:
 #	Ensure that the directory contains what it should
@@ -90,9 +91,9 @@ killtest:
 	pkill MRSpellCheckSla & pkill MRSpellCheckCli & pkill master-test &
 
 pipe: PipeSpellCheck.o
-	$(LD) -o $(EF)/PipeSpellCheck PipeSpellCheck.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
+	$(LD) -o $(EF)/PipeSpellCheck PipeSpellCheck.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBSNOLD)
 
-PipeSpellCheck.o: PipeSpellCheck.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
+PipeSpellCheck.o: PipeSpellCheck.cpp $(LB)/utility.hpp
 	$(CC) PipeSpellCheck.cpp
 
 .PHONY: update
@@ -121,8 +122,8 @@ cleanish:
 clean:
 	@rm -rf *.exe *.o *.stackdump *~
 	@rm -f master-test MRSpellCheckClient MRSpellCheckSlave
-	@rm -rf $(LB)
-	@rm -rf $(SC)
+	#@rm -rf $(LB) # not cool
+	#@rm -rf $(SC) # definitely not cool
 	@rm -rf client
 	@rm -rf worker
 	@echo 'Clean.'
