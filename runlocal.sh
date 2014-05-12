@@ -1,11 +1,13 @@
 #!/bin/bash
 
 
-test=/tmp/test/
-jobs=$test/jobs
-working=$test/working
-results=$test/results
-execs=$test/execs
+local=/tmp/test/
+global=$HOME/tmp/test/
+
+jobs=$global/jobs
+working=$local/working
+results=$global/results
+execs=$local/execs
 
 
 mkdir -p $jobs
@@ -35,7 +37,7 @@ cd $execs
 ./jobd.py $jobs $working $results &
 procs=$(jobs -p)
 disown -a
-echo procs
+echo $procs
 
 
 
