@@ -230,7 +230,7 @@ int main (int argc, char* argv[])
 		    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") busy: slave needs more time.\n";
 		    _utility::log.flush();          
 		    
-		    sleep(10);          
+		    sleep(1);          
 		    
 		    // resend message
 		    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *jobs[l])));
@@ -266,25 +266,33 @@ int main (int argc, char* argv[])
 	    bool receive_success = false;
 	    while (!(result.compare(WAITING_MESSAGE)) || !receive_success)
 	    {
-		std::stringstream new_request_message;
-		new_request_message << "ACCEPT_CHUNK" << "\n" << message.str();
-		bool send_success = false;
-		while (!(result.compare(ERROR_MESSAGE)) || !send_success)
+		if (!receive_success)
 		{
-		    jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
-		    jobs[l]->send_job(new_request_message.str());
+		    std::stringstream new_request_message;
+		    new_request_message << "ACCEPT_CHUNK" << "\n" << message.str();
+		    bool send_success = false;
+		    while (!(result.compare(ERROR_MESSAGE)) || !send_success)
+		    {
+			jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client)));
+			jobs[l]->send_job(new_request_message.str());
 
-		    send_success = jobs[l]->get_result(100000, result);
+			send_success = jobs[l]->get_result(100000, result);
+		    }
+		    result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *jobs[l])));
+		    result_jobs[l]->send_job(request_message.str());
+
+		    receive_success = result_jobs[l]->get_result(100000, result);
 		}
-		result_jobs[l] = std::move(std::unique_ptr<ClientJob>(new ClientJob(client, *jobs[l])));
-		result_jobs[l]->send_job(request_message.str());
-
-		receive_success = result_jobs[l]->get_result(100000, result);
+		else
+		{
+		    sleep(1);
+		    receive_success = result_jobs[l]->get_result(100000, result);
+		}
 	    }
 	    if (result != EMPTY_MESSAGE)
-		{
+	    {
 	        out << result;
-        }
+	    }
 	    _utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received." << std::endl;
 	    _utility::log.flush();          
 		
