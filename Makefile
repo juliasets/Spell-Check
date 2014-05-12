@@ -10,7 +10,8 @@ EF  := ../execs
 GC  := git clone -q
 LBU := https://github.com/juliasets/libdistributed.git
 SCU := https://github.com/elizabethkilson/SpellCorrector.git
-LIBS := -L$(LB) -ldistributed -lboost_system -pthread -lsqlite3
+LIBSNOLD := -lboost_system -pthread -lsqlite3
+LIBS := -L$(LB) -ldistributed $(LIBSNOLD)
 
 .PHONY: default
 default:  $(LB)/libdistributed.a $(SC)/spellcorrector.exe master-test client slave pipe
@@ -90,7 +91,7 @@ killtest:
 	pkill MRSpellCheckSla & pkill MRSpellCheckCli & pkill master-test &
 
 pipe: PipeSpellCheck.o
-	$(LD) -o $(EF)/PipeSpellCheck PipeSpellCheck.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
+	$(LD) -o $(EF)/PipeSpellCheck PipeSpellCheck.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBSNOLD)
 
 PipeSpellCheck.o: PipeSpellCheck.cpp $(LB)/utility.hpp
 	$(CC) PipeSpellCheck.cpp
