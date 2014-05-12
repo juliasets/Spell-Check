@@ -242,7 +242,7 @@ int main (int argc, char* argv[])
 		{
 		    out << result;
 		}
-		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received: " << result << std::endl;
+		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received." << std::endl;
 		_utility::log.flush();          
 		
 	    }	
@@ -252,7 +252,7 @@ int main (int argc, char* argv[])
 		{
 		    out << result;
 		}
-		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received: " << result << std::endl;
+		_utility::log.o << "ClientJob (" << result_jobs[l]->port() << ") result received." << std::endl;
 		_utility::log.flush();          
 	    }
 	}
