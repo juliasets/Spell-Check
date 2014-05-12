@@ -3,14 +3,14 @@ SHELL := /bin/bash
 G  := g++
 
 CC  := $(G) --std=c++11 -Wall -Wextra --pedantic -c
-LD  := $(G) --std=c++11 -Wall -Wextra --pedantic -lboost_system -pthread
+LD  := $(G) --std=c++11 -Wall -Wextra --pedantic -ldl -static -lboost_system -pthread
 LB  := ../libdistributed
 SC  := ../SpellCorrector
 EF  := ../execs
 GC  := git clone -q
 LBU := https://github.com/juliasets/libdistributed.git
 SCU := https://github.com/elizabethkilson/SpellCorrector.git
-LIBSNOLD := -lboost_system -pthread -lsqlite3
+LIBSNOLD := -static -lboost_system -pthread -lsqlite3 -ldl
 LIBS := -L$(LB) -ldistributed $(LIBSNOLD)
 
 .PHONY: default
