@@ -32,6 +32,8 @@ std::string format_word(std::string word, bool * end)
 	if (i < word.length())
 	    (*end) = true;
     }
+    if (words.empty())
+        return "";
     std::stringstream result;
     result << words.front();
     words.pop_front();
@@ -130,4 +132,5 @@ int main (int argc, char* argv[])
     }
     
     tpool.shutdown();
+    return 0;
 }
