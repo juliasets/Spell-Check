@@ -50,10 +50,14 @@ def main (argv = None):
             outf.write(
 """
 import subprocess
+import sys
 proc = subprocess.Popen(
     ['../execs/PipeSpellCheck', '%s', '%s', '%s'],
     stdin=subprocess.PIPE)
 proc.communicate(%s)
+if proc.returncode != 0:
+    sys.stderr.write('Child died with error code ' + \
+        str(proc.returncode) + '\n')
 exit(proc.returncode)
 """ % ('../Dictionary/unigrams.txt', '../Dictionary/trained21.txt', '../Dictionary/BigramDatabase.db', repr(data))
             )
