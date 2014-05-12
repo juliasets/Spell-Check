@@ -41,7 +41,10 @@ class Daemon (object):
             result = subprocess.call([sys.executable, workingpath],
                 stdout = open(resultpath, 'wb'))
             if result == 0:
-                shutil.move(resultpath, self.results)
+                try:
+                    shutil.move(resultpath, self.results)
+                except shutil.Error:
+                    pass
                 job.finish(True)
                 return True
         return None
