@@ -57,7 +57,7 @@ proc = subprocess.Popen(
 proc.communicate(%s)
 if proc.returncode != 0:
     sys.stderr.write('Child died with error code ' + \\
-        str(proc.returncode) + '\n')
+        str(proc.returncode) + '\\n')
 exit(proc.returncode)
 """ % ('../Dictionary/unigrams.txt', '../Dictionary/trained21.txt', '../Dictionary/BigramDatabase.db', repr(data))
             )
