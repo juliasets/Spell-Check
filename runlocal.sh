@@ -21,7 +21,7 @@ cp splitjob.py $execs
 cp joinjob.py $execs
 cp jobd.py $execs
 cp job.py $execs
-cp ../execs/PipeSpellCheck $execs
+cp ../SpellCorrector/threadedSpellCheck.exe $execs
 cp -nr ../Dictionary $local
 
 cd $execs

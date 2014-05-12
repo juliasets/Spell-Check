@@ -52,7 +52,7 @@ def main (argv = None):
 import subprocess
 import sys
 proc = subprocess.Popen(
-    ['../execs/PipeSpellCheck', '%s', '%s', '%s'],
+    ['../execs/threadedSpellCheck.exe'],
     stdin=subprocess.PIPE)
 proc.communicate(%s)
 if proc.returncode != 0:
