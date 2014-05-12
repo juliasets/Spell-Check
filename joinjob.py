@@ -38,7 +38,7 @@ def main (argv = None):
 
     resultlist = sorted(result for result in os.listdir(results) if \
         result.endswith('.result') and \
-        result.split(',')[1].strip('.result') == jobname)
+        result.split(',')[1].split('.')[0] == jobname)
 
     for result in resultlist:
         fname = os.path.join(results, result)
