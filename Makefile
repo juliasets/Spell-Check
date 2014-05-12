@@ -38,7 +38,7 @@ $(LB)/libdistributed.a:
 		echo ''; \
 	fi
 #	Actually run make
-	@cd $(LB) && $(MAKE) libdistributed.a
+#	@cd $(LB) && $(MAKE) libdistributed.a
 
 $(SC)/spellcorrector.exe:
 #	Ensure that the directory contains what it should
