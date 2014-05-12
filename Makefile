@@ -92,7 +92,7 @@ killtest:
 pipe: PipeSpellCheck.o
 	$(LD) -o $(EF)/PipeSpellCheck PipeSpellCheck.o $(SC)/threadedSpellCorrector.o $(SC)/corrector.o $(SC)/string_functions.o $(LIBS)
 
-PipeSpellCheck.o: PipeSpellCheck.cpp $(LB)/Slave.hpp $(LB)/utility.hpp
+PipeSpellCheck.o: PipeSpellCheck.cpp $(LB)/utility.hpp
 	$(CC) PipeSpellCheck.cpp
 
 .PHONY: update
@@ -121,8 +121,8 @@ cleanish:
 clean:
 	@rm -rf *.exe *.o *.stackdump *~
 	@rm -f master-test MRSpellCheckClient MRSpellCheckSlave
-	@rm -rf $(LB)
-	@rm -rf $(SC)
+	#@rm -rf $(LB) # not cool
+	#@rm -rf $(SC) # definitely not cool
 	@rm -rf client
 	@rm -rf worker
 	@echo 'Clean.'
